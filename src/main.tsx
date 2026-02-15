@@ -3,9 +3,9 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom"
 import "./index.css"
 
 import Hello from "./components/Hello"
-import Login, { action as loginAction } from "./Pages/Login"
+import Login from "./Pages/Login"
 import BookingLayout from "./Pages/Booking"
-import SignUp, { action as signupAction } from "./Pages/SignUp"
+import SignUp from "./Pages/SignUp"
 import { store } from "./store"
 import { Provider } from "react-redux"
 
@@ -18,12 +18,12 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
-    action: loginAction,
+   
   },
   {
     path: "/SignUp",
     element: <SignUp />,
-    action: signupAction,
+   
   },
   {
     path: "/hello/:id",

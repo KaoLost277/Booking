@@ -1,47 +1,44 @@
-import {
-  Link,
-  redirect,
-  useFetcher,
-  useSearchParams,
-  type ActionFunctionArgs,
-} from 'react-router-dom'
-
-import { createClient } from '../lib/client'
-
-export const action = async ({ request }: ActionFunctionArgs) => {
-  const supabase = createClient()
-
-  const url = new URL(request.url)
-  const origin = url.origin
-
-  const formData = await request.formData()
-  const email = String(formData.get('email') ?? '')
-  const password = String(formData.get('password') ?? '')
-  const repeatPassword = String(formData.get('repeat-password') ?? '')
-
-  if (!email) return { error: 'Email is required' }
-  if (!password) return { error: 'Password is required' }
-  if (password !== repeatPassword) return { error: 'Passwords do not match' }
-
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { emailRedirectTo: `${origin}/protected` },
-  })
-
-  if (error) return { error: error.message }
-
-  // ให้หน้าเห็น success จาก search params
-  return redirect('/signup?success=1')
-}
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { signUp } from '../features/auth/authSlice'
+import type { AppDispatch, RootState } from '../store'
 
 export default function SignUp() {
-  const fetcher = useFetcher<typeof action>()
-  const [searchParams] = useSearchParams()
+  const dispatch = useDispatch<AppDispatch>()
+  const { status, error, user } = useSelector((state: RootState) => state.auth)
+  const [repeatPassword, setRepeatPassword] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [passwordMismatch, setPasswordMismatch] = useState(false)
+  const [success, setSuccess] = useState(false)
 
-  const success = searchParams.has('success')
-  const error = fetcher.data?.error
-  const loading = fetcher.state === 'submitting'
+  const loading = status === 'loading'
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!email) {
+      return
+    }
+    if (!password) {
+      return
+    }
+    if (password !== repeatPassword) {
+      setPasswordMismatch(true)
+      return
+    }
+
+    setPasswordMismatch(false)
+    const result = await dispatch(signUp({ email, password }))
+
+    if (signUp.fulfilled.match(result)) {
+      setSuccess(true)
+      setEmail('')
+      setPassword('')
+      setRepeatPassword('')
+    }
+  }
 
   return (
     <div className="min-h-svh bg-slate-50">
@@ -63,7 +60,7 @@ export default function SignUp() {
                 account before signing in.
               </p>
             ) : (
-              <fetcher.Form method="post" className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Email */}
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-slate-900">
@@ -72,11 +69,12 @@ export default function SignUp() {
                   <div className="mt-2">
                     <input
                       id="email"
-                      name="email"
                       type="email"
                       placeholder="m@example.com"
                       required
                       autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-[#6B2FF9] focus:ring-4 focus:ring-[#6B2FF9]/10"
                     />
                   </div>
@@ -90,10 +88,11 @@ export default function SignUp() {
                   <div className="mt-2">
                     <input
                       id="password"
-                      name="password"
                       type="password"
                       required
                       autoComplete="new-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-[#6B2FF9] focus:ring-4 focus:ring-[#6B2FF9]/10"
                     />
                   </div>
@@ -110,16 +109,24 @@ export default function SignUp() {
                   <div className="mt-2">
                     <input
                       id="repeat-password"
-                      name="repeat-password"
                       type="password"
                       required
                       autoComplete="new-password"
+                      value={repeatPassword}
+                      onChange={(e) => setRepeatPassword(e.target.value)}
                       className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-[#6B2FF9] focus:ring-4 focus:ring-[#6B2FF9]/10"
                     />
                   </div>
                 </div>
 
-                {/* Error */}
+                {/* Error - Password Mismatch */}
+                {passwordMismatch && (
+                  <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2">
+                    <p className="text-sm text-red-700">Passwords do not match</p>
+                  </div>
+                )}
+
+                {/* Error - From Redux */}
                 {error && (
                   <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2">
                     <p className="text-sm text-red-700">{error}</p>
@@ -148,7 +155,7 @@ export default function SignUp() {
                     Login
                   </Link>
                 </p>
-              </fetcher.Form>
+              </form>
             )}
           </div>
 

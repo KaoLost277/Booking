@@ -1,9 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import counterReducer from './features/counterSlice'
+import authReducer from './features/auth/authSlice'
 import { todosApi } from "./features/todo/todoSlice"
+
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
+    auth: authReducer,
     [todosApi.reducerPath]: todosApi.reducer, // <-- ใส่ api reducer
   },
   middleware: (getDefaultMiddleware) =>
