@@ -3,7 +3,7 @@ import { Link, redirect, useFetcher, type ActionFunctionArgs } from 'react-route
 import { createClient } from '../lib/client'
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { supabase, headers } = createClient(request)
+  //const { supabase, headers } = createClient(request)
 
   const formData = await request.formData()
 
