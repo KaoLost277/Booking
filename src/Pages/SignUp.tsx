@@ -4,22 +4,22 @@ import {
   useFetcher,
   useSearchParams,
   type ActionFunctionArgs,
-} from 'react-router'
+} from 'react-router-dom'
 
 import { createClient } from '../lib/client'
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { supabase } = createClient(request)
+  const supabase = createClient()
 
   const url = new URL(request.url)
   const origin = url.origin
 
   const formData = await request.formData()
+  const email = String(formData.get('email') ?? '')
+  const password = String(formData.get('password') ?? '')
+  const repeatPassword = String(formData.get('repeat-password') ?? '')
 
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const repeatPassword = formData.get('repeat-password') as string
-
+  if (!email) return { error: 'Email is required' }
   if (!password) return { error: 'Password is required' }
   if (password !== repeatPassword) return { error: 'Passwords do not match' }
 
@@ -31,7 +31,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   if (error) return { error: error.message }
 
-  return redirect('/')
+  // ให้หน้าเห็น success จาก search params
+  return redirect('/signup?success=1')
 }
 
 export default function SignUp() {
@@ -83,10 +84,7 @@ export default function SignUp() {
 
                 {/* Password */}
                 <div>
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-slate-900"
-                  >
+                  <label htmlFor="password" className="block text-sm font-medium text-slate-900">
                     Password
                   </label>
                   <div className="mt-2">
@@ -146,10 +144,7 @@ export default function SignUp() {
                 {/* Footer */}
                 <p className="text-center text-sm text-slate-600">
                   Already have an account?{' '}
-                  <Link
-                    to="/login"
-                    className="font-medium text-[#6B2FF9] hover:text-[#5A26D6]"
-                  >
+                  <Link to="/login" className="font-medium text-[#6B2FF9] hover:text-[#5A26D6]">
                     Login
                   </Link>
                 </p>
