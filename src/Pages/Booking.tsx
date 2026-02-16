@@ -1,6 +1,7 @@
 import React from "react";
 import Navbars from '../components/Navbars.tsx'
 import BookingTable from '../components/BookingTable.tsx'
+
 type AppLayoutProps = {
   title?: string;
   children?: React.ReactNode;

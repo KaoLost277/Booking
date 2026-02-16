@@ -6,7 +6,7 @@ import type { AppDispatch, RootState } from '../store'
 
 export default function SignUp() {
   const dispatch = useDispatch<AppDispatch>()
-  const { status, error, user } = useSelector((state: RootState) => state.auth)
+  const { status, error} = useSelector((state: RootState) => state.auth)
   const [repeatPassword, setRepeatPassword] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
