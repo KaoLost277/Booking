@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { signUp } from '../features/auth/authSlice'
+import { signUp } from '../features/authSlice'
 import type { AppDispatch, RootState } from '../store'
 
 export default function SignUp() {

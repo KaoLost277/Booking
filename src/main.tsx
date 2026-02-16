@@ -10,7 +10,8 @@ import { store } from "./store"
 import { Provider } from "react-redux"
 import ProtectedRoute from './components/ProtectedRoute'
 import { createClient } from './lib/client'
-import { setSession } from './features/auth/authSlice'
+import { setSession } from './features/authSlice'
+import Test from "./Pages/test"
 
 // initialize supabase client and sync session to redux store
 const supabase = createClient()
@@ -45,6 +46,11 @@ const router = createBrowserRouter([
     path: "/hello/:id",
     element: <Hello />,
   },
+  {
+    path: "/Test",
+    element: <Test />,
+   
+  }
 ])
 
 createRoot(document.getElementById("root")!).render(

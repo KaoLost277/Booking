@@ -1,16 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit'
 import counterReducer from './features/counterSlice'
-import authReducer from './features/auth/authSlice'
-import { todosApi } from "./features/todo/todoSlice"
+import authReducer from './features/authSlice'
+import bookReducer from './features/bookSlice'
+
 
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
     auth: authReducer,
-    [todosApi.reducerPath]: todosApi.reducer, // <-- ใส่ api reducer
-  },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(todosApi.middleware), // <-- ใส่ api middleware
+    book: bookReducer
+    // <-- ใส่ api reducer
+  } // <-- ใส่ api middleware
 })
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

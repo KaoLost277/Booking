@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
-import { signOut } from '../features/auth/authSlice';
+import { signOut } from '../features/authSlice';
 import type { AppDispatch, RootState } from '../store';
 type NavItem = {
   label: string;

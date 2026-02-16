@@ -264,7 +264,7 @@ function BookingTable() {
               </span>
             </div>
 
-            {/* ✅ เพิ่ม date ใน mobile */}
+            {/*เพิ่ม date ใน mobile */}
             <div className="text-sm text-gray-600 mb-3 space-y-1">
               <p>
                 วันที่: <span className="font-medium text-gray-800">{formatDate(b.date)}</span>
