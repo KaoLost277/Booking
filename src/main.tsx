@@ -8,12 +8,28 @@ import BookingLayout from "./Pages/Booking"
 import SignUp from "./Pages/SignUp"
 import { store } from "./store"
 import { Provider } from "react-redux"
+import ProtectedRoute from './components/ProtectedRoute'
+import { createClient } from './lib/client'
+import { setSession } from './features/auth/authSlice'
+
+// initialize supabase client and sync session to redux store
+const supabase = createClient()
+supabase.auth.getSession().then(({ data }) => {
+  store.dispatch(setSession(data.session))
+})
+supabase.auth.onAuthStateChange((_event, session) => {
+  store.dispatch(setSession(session))
+})
 
 // สร้าง Data Router
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <BookingLayout />,
+    element: (
+      <ProtectedRoute>
+        <BookingLayout />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/login",
