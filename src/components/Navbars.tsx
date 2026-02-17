@@ -4,6 +4,7 @@ import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { signOut } from '../features/authSlice';
 import type { AppDispatch, RootState } from '../store';
+import {PATH} from '../constants.ts'
 type NavItem = {
   label: string;
   to: string;
@@ -17,16 +18,17 @@ type NavbarsProps = {
 };
 
 const defaultItems: NavItem[] = [
-{ label: "Booking", to: "/", end: true },
-{ label: "Customer", to: "/features" },
-{ label: "Dashboard", to: "/pricing" }
+{ label: "Booking", to: PATH.HOME, end: true },
+{ label: "Customer", to: PATH.CUSTOMER },
+{ label: "Dashboard", to: PATH.DASHBOARD }
+
 
 ];
 
 export default function Navbars({
-  brand = { name: "Booking Apps", to: "/" },
+  brand = { name: "Booking Apps", to: PATH.HOME },
   items = defaultItems,
-  cta = { label: "Signout", to: "/Login" },
+  cta = { label: "Signout", to: PATH.LOGIN },
 }: NavbarsProps) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -63,7 +65,7 @@ export default function Navbars({
   const handleSignOut = async () => {
     const res = await dispatch(signOut())
     if (signOut.fulfilled.match(res)) {
-      navigate('/login')
+      navigate(PATH.LOGIN)
     }
   }
 
