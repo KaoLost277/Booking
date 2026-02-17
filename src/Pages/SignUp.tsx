@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { signUp } from '../features/authSlice'
 import type { AppDispatch, RootState } from '../store'
+import {PATH} from '../constants.ts'
 
 export default function SignUp() {
   const dispatch = useDispatch<AppDispatch>()
@@ -151,7 +152,7 @@ export default function SignUp() {
                 {/* Footer */}
                 <p className="text-center text-sm text-slate-600">
                   Already have an account?{' '}
-                  <Link to="/login" className="font-medium text-[#6B2FF9] hover:text-[#5A26D6]">
+                  <Link to={PATH.LOGIN} className="font-medium text-[#6B2FF9] hover:text-[#5A26D6]">
                     Login
                   </Link>
                 </p>

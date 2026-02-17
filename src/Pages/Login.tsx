@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { signIn } from '../features/authSlice'
 import type { AppDispatch, RootState } from '../store'
+import { PATH } from '../constants'
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>()
@@ -24,7 +25,7 @@ export default function Login() {
     if (signIn.fulfilled.match(result)) {
       setEmail('')
       setPassword('')
-      navigate('/')
+      navigate(PATH.HOME)
     }
   }
 
@@ -100,7 +101,7 @@ export default function Login() {
 
               <p className="text-center text-sm text-slate-600">
                 Don&apos;t have an account?{' '}
-                <Link to="/SignUp" className="font-medium text-[#6B2FF9] hover:text-[#5A26D6]">
+                <Link to={PATH.SIGNUP} className="font-medium text-[#6B2FF9] hover:text-[#5A26D6]">
                   Sign up
                 </Link>
               </p>
