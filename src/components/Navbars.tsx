@@ -8,7 +8,7 @@ import {PATH} from '../constants.ts'
 type NavItem = {
   label: string;
   to: string;
-  end?: boolean; // ใช้กับ "/" เพื่อไม่ให้ active ทุกหน้า
+  end?: boolean; // ใช้กับ "/" เพื่อไม่ให้ active 
 };
 
 type NavbarsProps = {
