@@ -1,11 +1,14 @@
 // Navbars.tsx
 import { useEffect, useState } from "react";
-import { NavLink, Link } from "react-router-dom";
-
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import { signOut } from '../features/authSlice';
+import type { AppDispatch, RootState } from '../store';
+import {PATH} from '../constants.ts'
 type NavItem = {
   label: string;
   to: string;
-  end?: boolean; // ใช้กับ "/" เพื่อไม่ให้ active ทุกหน้า
+  end?: boolean; // ใช้กับ "/" เพื่อไม่ให้ active 
 };
 
 type NavbarsProps = {
@@ -15,16 +18,17 @@ type NavbarsProps = {
 };
 
 const defaultItems: NavItem[] = [
-{ label: "Booking", to: "/", end: true },
-{ label: "Customer", to: "/features" },
-{ label: "Dashboard", to: "/pricing" }
+{ label: "Booking", to: PATH.HOME, end: true },
+{ label: "Customer", to: PATH.CUSTOMER },
+{ label: "Dashboard", to: PATH.DASHBOARD }
+
 
 ];
 
 export default function Navbars({
-  brand = { name: "Booking Apps", to: "/" },
+  brand = { name: "Booking Apps", to: PATH.HOME },
   items = defaultItems,
-  cta = { label: "เพิ่มรายการจอง", to: "/start" },
+  cta = { label: "Signout", to: PATH.LOGIN },
 }: NavbarsProps) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -52,6 +56,18 @@ export default function Navbars({
   const linkInactive =
     "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 focus-visible:ring-zinc-300";
   const linkActive = "bg-zinc-100 text-zinc-900 focus-visible:ring-zinc-300";
+
+  const dispatch = useDispatch<AppDispatch>()
+  const navigate = useNavigate()
+  const { status } = useSelector((state: RootState) => state.auth)
+  const loading = status === 'loading'
+
+  const handleSignOut = async () => {
+    const res = await dispatch(signOut())
+    if (signOut.fulfilled.match(res)) {
+      navigate(PATH.LOGIN)
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50">
@@ -114,12 +130,14 @@ export default function Navbars({
           {/* Right actions */}
           <div className="flex items-center gap-2">
             {/* CTA desktop */}
-            <NavLink
-              to={cta.to}
-              className="hidden md:inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-black/5 transition hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+            <button
+              type="button"
+              onClick={handleSignOut}
+              disabled={loading}
+              className="hidden md:inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-black/5 transition hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {cta.label}
-            </NavLink>
+              {loading ? 'Signing out...' : cta.label}
+            </button>
 
             {/* Mobile button */}
             <button
@@ -180,13 +198,17 @@ export default function Navbars({
                 ))}
 
                 <div className="mt-2 px-2">
-                  <NavLink
-                    to={cta.to}
-                    onClick={() => setOpen(false)}
-                    className="inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-black/5 transition hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false)
+                      handleSignOut()
+                    }}
+                    disabled={loading}
+                    className="inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-black/5 transition hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    {cta.label}
-                  </NavLink>
+                    {loading ? 'Signing out...' : cta.label}
+                  </button>
                 </div>
               </div>
             </div>
