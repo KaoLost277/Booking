@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client"
 import { RouterProvider, createBrowserRouter } from "react-router-dom"
 import "./index.css"
-import {PATH} from "../src/constants"
+import { PATH } from "../src/constants"
 
 import Hello from "./components/Hello"
 import Login from "./Pages/Login"
@@ -13,6 +13,7 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import { createClient } from "./lib/client"
 import { setSession } from "./features/authSlice"
 import Test from "./Pages/test"
+import { ThemeProvider } from "./contexts/ThemeContext"
 
 // initialize supabase client and sync session to redux store
 const supabase = createClient()
@@ -36,12 +37,12 @@ const router = createBrowserRouter([
   {
     path: PATH.LOGIN,
     element: <Login />,
-   
+
   },
   {
     path: PATH.SIGNUP,
     element: <SignUp />,
-   
+
   },
   {
     path: "/hello/:id",
@@ -50,12 +51,14 @@ const router = createBrowserRouter([
   {
     path: "/Test",
     element: <Test />,
-   
+
   }
 ])
 
 createRoot(document.getElementById("root")!).render(
-  <Provider store={store}>
-    <RouterProvider router={router} />
-  </Provider>
+  <ThemeProvider>
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
+  </ThemeProvider>
 )

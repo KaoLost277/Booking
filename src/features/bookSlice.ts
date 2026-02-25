@@ -5,23 +5,19 @@ const supabase = createClient()
 
 interface BookingTable {
   ID: number;
-
   created_at: string; // timestamptz
-
   StartTime: string | null; // time
   EndTime: string | null;   // time
   Date: string | null;      // date
-
   Price: number | null;
   Tax: number | null;
   Summary: number | null;
-
   Status: string | null;
   Notes: string | null;
-
   CustomerID: number | null;
+  CustomerMaster?: { CustomerName: string }[];
   CreatedID: string | null; // uuid
-  LocationID: number | null;
+  LocationMaster?: { LocationName: string }[];
 }
 
 
@@ -43,7 +39,7 @@ export const bookGet = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     const { data, error } = await supabase
       .from('BookingTable')
-      .select('*')
+      .select('ID,created_at,StartTime,EndTime,Date,Price,Tax,Summary,Status,Notes,CustomerID,CustomerMaster(CustomerName),CreatedID,LocationMaster(LocationName)')
 
     if (error) return rejectWithValue(error.message)
 

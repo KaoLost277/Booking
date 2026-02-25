@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { signUp } from '../features/authSlice'
 import type { AppDispatch, RootState } from '../store'
-import {PATH} from '../constants.ts'
+import { PATH } from '../constants.ts'
+import InputComponent from '../components/CustomInput'
+import CustomButton from '../components/CustomButton'
 
 export default function SignUp() {
   const dispatch = useDispatch<AppDispatch>()
-  const { status, error} = useSelector((state: RootState) => state.auth)
+  const { status, error } = useSelector((state: RootState) => state.auth)
   const [repeatPassword, setRepeatPassword] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -62,70 +64,38 @@ export default function SignUp() {
               </p>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Email */}
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-slate-900">
-                    Email
-                  </label>
-                  <div className="mt-2">
-                    <input
-                      id="email"
-                      type="email"
-                      placeholder="m@example.com"
-                      required
-                      autoComplete="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-[#6B2FF9] focus:ring-4 focus:ring-[#6B2FF9]/10"
-                    />
-                  </div>
-                </div>
+                <InputComponent lightOnly
+                  id="email"
+                  label="Email"
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
 
-                {/* Password */}
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-slate-900">
-                    Password
-                  </label>
-                  <div className="mt-2">
-                    <input
-                      id="password"
-                      type="password"
-                      required
-                      autoComplete="new-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-[#6B2FF9] focus:ring-4 focus:ring-[#6B2FF9]/10"
-                    />
-                  </div>
-                </div>
+                <InputComponent lightOnly
+                  id="password"
+                  label="Password"
+                  type="password"
+                  required
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
 
-                {/* Repeat Password */}
-                <div>
-                  <label
-                    htmlFor="repeat-password"
-                    className="block text-sm font-medium text-slate-900"
-                  >
-                    Repeat Password
-                  </label>
-                  <div className="mt-2">
-                    <input
-                      id="repeat-password"
-                      type="password"
-                      required
-                      autoComplete="new-password"
-                      value={repeatPassword}
-                      onChange={(e) => setRepeatPassword(e.target.value)}
-                      className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-[#6B2FF9] focus:ring-4 focus:ring-[#6B2FF9]/10"
-                    />
-                  </div>
-                </div>
+                <InputComponent lightOnly
+                  id="repeat-password"
+                  label="Repeat Password"
+                  type="password"
+                  required
+                  autoComplete="new-password"
+                  value={repeatPassword}
+                  onChange={(e) => setRepeatPassword(e.target.value)}
+                  error={passwordMismatch ? "Passwords do not match" : undefined}
+                />
 
-                {/* Error - Password Mismatch */}
-                {passwordMismatch && (
-                  <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2">
-                    <p className="text-sm text-red-700">Passwords do not match</p>
-                  </div>
-                )}
 
                 {/* Error - From Redux */}
                 {error && (
@@ -135,19 +105,13 @@ export default function SignUp() {
                 )}
 
                 {/* Submit */}
-                <button
+                <CustomButton
                   type="submit"
-                  disabled={loading}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#7F23FE] via-[#6B2FF9] to-[#5438F7] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-[#6B2FF9]/15 disabled:cursor-not-allowed disabled:opacity-60"
+                  loading={loading}
+                  fullWidth
                 >
-                  {loading && (
-                    <span
-                      className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
-                      aria-hidden="true"
-                    />
-                  )}
                   {loading ? 'Creating an account...' : 'Sign up'}
-                </button>
+                </CustomButton>
 
                 {/* Footer */}
                 <p className="text-center text-sm text-slate-600">
