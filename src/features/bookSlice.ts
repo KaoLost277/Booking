@@ -1,34 +1,16 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import {createClient} from  '../lib/client'
+import { createClient } from '../lib/client'
+import type { Booking } from '../types/booking'
 
 const supabase = createClient()
 
-interface BookingTable {
-  ID: number;
-  created_at: string; // timestamptz
-  StartTime: string | null; // time
-  EndTime: string | null;   // time
-  Date: string | null;      // date
-  Price: number | null;
-  Tax: number | null;
-  Summary: number | null;
-  Status: string | null;
-  Notes: string | null;
-  CustomerID: number | null;
-  CustomerMaster?: { CustomerName: string }[];
-  CreatedID: string | null; // uuid
-  LocationMaster?: { LocationName: string }[];
-}
-
-
-
 type BookState = {
-  data: BookingTable[]
+  data: Booking[]
   loading: boolean
   error: string | null
 }
 
-const initialState:BookState = {
+const initialState: BookState = {
   data: [],
   loading: false,
   error: null as string | null
@@ -43,7 +25,7 @@ export const bookGet = createAsyncThunk(
 
     if (error) return rejectWithValue(error.message)
 
-    return data 
+    return data
   }
 )
 
@@ -59,7 +41,7 @@ const bookSlice = createSlice({
       })
       .addCase(bookGet.fulfilled, (state, action) => {
         state.loading = false
-        state.data = action.payload  
+        state.data = action.payload
       })
       .addCase(bookGet.rejected, (state, action) => {
         state.loading = false

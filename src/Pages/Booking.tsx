@@ -3,9 +3,11 @@ import Navbars from '../components/Navbars.tsx'
 import BookingTable from '../components/BookingTable.tsx'
 import BookingFilter from '../components/BookingFilter.tsx'
 import CustomButton from '../components/CustomButton.tsx'
-import { Plus, CalendarDays } from 'lucide-react'
+import { Plus, CalendarDays, Database } from 'lucide-react'
 import Test from "./test"
 import BookingModal from '../components/BookingModal';
+import { useAppDispatch } from "../hooks";
+import { fetchMasterData } from "../features/masterDataSlice";
 type AppLayoutProps = {
   title?: string;
   children?: React.ReactNode;
@@ -25,8 +27,18 @@ function BookingLayout({ }: AppLayoutProps) {
     return () => observer.disconnect();
   }, []);
 
+  const dispatch = useAppDispatch();
   const handleNewBooking = () => {
     setIsModalOpen(true);
+  };
+
+  const handleTestMaster = async () => {
+    try {
+      const result = await dispatch(fetchMasterData()).unwrap();
+      console.log("Master Data Result:", result);
+    } catch (error) {
+      console.error("Master Data Error:", error);
+    }
   };
 
   return (
@@ -54,6 +66,13 @@ function BookingLayout({ }: AppLayoutProps) {
 
             {/* Actions */}
             <div ref={heroButtonRef} className="flex items-center gap-3">
+              <CustomButton
+                onClick={handleTestMaster}
+                variant="secondary"
+              >
+                <Database className="w-5 h-5" />
+                Test Master Data
+              </CustomButton>
               <Test />
               <CustomButton onClick={handleNewBooking}>
                 <Plus className="w-5 h-5" />

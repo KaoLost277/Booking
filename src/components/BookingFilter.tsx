@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Search, Calendar, User, MapPin, ChevronDown, Check, Plus } from 'lucide-react';
 import CustomButton from './CustomButton';
 import SearchableSelect from './SearchableSelect';
+import { useAppSelector } from '../hooks';
 
 const BookingFilter: React.FC = () => {
     const [date, setDate] = useState('');
@@ -11,24 +12,17 @@ const BookingFilter: React.FC = () => {
     const [isExpanded, setIsExpanded] = useState(true);
 
 
-    const customerOptions = [
-        { id: 1, label: 'ลูกค้าทั่วไป' },
-        { id: 2, label: 'บริษัท เอสซีจี' },
-        { id: 3, label: 'ปตท. จำกัด' },
-    ];
+    const { customers, locations, statusOptions } = useAppSelector((state) => state.masterData);
 
-    const locationOptions = [
-        { id: 1, label: 'ห้องประชุม A' },
-        { id: 2, label: 'ห้องประชุม B' },
-        { id: 3, label: 'ห้องโถงกลาง' },
-    ];
+    const customerOptions = customers.map((c) => ({
+        id: c.ID,
+        label: c.CustomerName
+    }));
 
-    const statusOptions = [
-        { id: 'Booking', label: 'จองแล้ว' },
-        { id: 'Inprogress', label: 'กำลังดำเนินการ' },
-        { id: 'Completed', label: 'เสร็จสิ้น' },
-        { id: 'Canceled', label: 'ยกเลิก' },
-    ];
+    const locationOptions = locations.map((l) => ({
+        id: l.ID,
+        label: l.LocationName
+    }));
 
     const handleSearch = () => {
         console.log('Searching for:', { date, customer, location, status });

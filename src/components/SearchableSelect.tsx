@@ -13,6 +13,7 @@ export interface SearchableSelectProps {
     value: string | number;
     onChange: (value: string | number) => void;
     placeholder: string;
+    error?: boolean;
 }
 
 const SearchableSelect: React.FC<SearchableSelectProps> = ({
@@ -21,7 +22,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
     options,
     value,
     onChange,
-    placeholder
+    placeholder,
+    error
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -54,9 +56,11 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
             ) : null}
             <div
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center gap-2 w-full h-11 px-3 rounded-lg border bg-white dark:bg-[#1a1a1a] cursor-pointer transition-all duration-150 ${isOpen
-                    ? 'border-[#0d0d0d] dark:border-[#ececf1] ring-1 ring-[#0d0d0d]/10 dark:ring-[#ececf1]/10'
-                    : 'border-[#e5e5e5] dark:border-[#2a2a2a] hover:border-[#c5c5d2] dark:hover:border-[#444654]'
+                className={`flex items-center gap-2 w-full h-11 px-3 rounded-lg border bg-white dark:bg-[#1a1a1a] cursor-pointer transition-all duration-150 ${error
+                    ? 'border-red-500 ring-1 ring-red-500/10'
+                    : isOpen
+                        ? 'border-[#0d0d0d] dark:border-[#ececf1] ring-1 ring-[#0d0d0d]/10 dark:ring-[#ececf1]/10'
+                        : 'border-[#e5e5e5] dark:border-[#2a2a2a] hover:border-[#c5c5d2] dark:hover:border-[#444654]'
                     }`}
             >
                 {icon && <span className="text-[#6e6e80] dark:text-[#8e8ea0] shrink-0">{icon}</span>}
