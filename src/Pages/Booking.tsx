@@ -5,7 +5,7 @@ import BookingFilter from '../components/BookingFilter.tsx'
 import CustomButton from '../components/CustomButton.tsx'
 import { Plus, CalendarDays } from 'lucide-react'
 import Test from "./test"
-
+import BookingModal from '../components/BookingModal';
 type AppLayoutProps = {
   title?: string;
   children?: React.ReactNode;
@@ -14,6 +14,7 @@ type AppLayoutProps = {
 function BookingLayout({ }: AppLayoutProps) {
   const [showFab, setShowFab] = useState(false);
   const heroButtonRef = useRef<HTMLDivElement>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -25,7 +26,7 @@ function BookingLayout({ }: AppLayoutProps) {
   }, []);
 
   const handleNewBooking = () => {
-    console.log('Open New Booking Modal');
+    setIsModalOpen(true);
   };
 
   return (
@@ -75,25 +76,8 @@ function BookingLayout({ }: AppLayoutProps) {
       </main>
 
       {/* Floating Action Button */}
-      <button
-        onClick={handleNewBooking}
-        aria-label="เพิ่มการจองใหม่"
-        className={[
-          "fixed bottom-6 right-6 z-50 flex items-center gap-2",
-          "rounded-full bg-[#0d0d0d] dark:bg-[#ececf1] text-white dark:text-[#0d0d0d]",
-          "shadow-lg hover:shadow-xl",
-          "transition-all duration-300 ease-out cursor-pointer",
-          "hover:scale-105 active:scale-95",
-          "focus:outline-none focus-visible:ring-4 focus-visible:ring-[#a3a3a3]",
-          "h-14 px-5 text-sm font-medium",
-          showFab
-            ? "translate-y-0 opacity-100"
-            : "translate-y-16 opacity-0 pointer-events-none",
-        ].join(" ")}
-      >
-        <Plus className="w-5 h-5" />
-        <span className="hidden sm:inline">เพิ่มการจองใหม่</span>
-      </button>
+      <BookingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
     </div>
   );
 }

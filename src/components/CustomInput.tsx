@@ -11,9 +11,9 @@ const InputComponent = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, className = '', id, lightOnly = false, ...props }, ref) => {
 
     // สไตล์ให้ตรงกับ combobox ใน BookingFilter (OpenAI theme)
-    const baseClasses = `block w-full rounded-lg border px-3 py-2 text-sm shadow-sm outline-none transition-all ${lightOnly
-        ? "bg-white text-[#0d0d0d] placeholder:text-[#acacbe]"
-        : "bg-white dark:bg-[#1a1a1a] text-[#0d0d0d] dark:text-[#ececf1] placeholder:text-[#acacbe] dark:placeholder:text-[#6e6e80]"
+    const baseClasses = `block w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all ${lightOnly
+      ? "bg-white text-[#0d0d0d] placeholder:text-[#acacbe]"
+      : "bg-white dark:bg-[#1a1a1a] text-[#0d0d0d] dark:text-[#ececf1] placeholder:text-[#acacbe] dark:placeholder:text-[#6e6e80]"
       }`;
 
     const statusClasses = error
