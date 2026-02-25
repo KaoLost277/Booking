@@ -29,6 +29,46 @@ export const bookGet = createAsyncThunk(
   }
 )
 
+
+export const InsertBook = createAsyncThunk(
+  'book/insert',
+  async (newBooking: Partial<Booking> & Record<string, any>, { rejectWithValue }) => {
+    const { data, error } = await supabase
+      .from('BookingTable')
+      .insert([newBooking])
+      .select()
+
+    if (error) return rejectWithValue(error.message)
+
+    return data
+  }
+)
+
+// ตรวจสอบการจองซ้ำซ้อน: ดึงเฉพาะรายการที่วันที่ตรงกันและเวลาทับซ้อนจาก Database โดยตรง
+export const checkBookingOverlap = createAsyncThunk(
+  'book/checkOverlap',
+  async (
+    params: { date: string, startTime: string, endTime: string },
+    { rejectWithValue }
+  ) => {
+    const { date, startTime, endTime } = params
+
+    // Query ที่ Database level เพื่อประสิทธิภาพ:
+    // หา booking ที่วันตรงกัน และ เวลาทับซ้อน (StartTime < endTime AND EndTime > startTime)
+    const { data, error } = await supabase
+      .from('BookingTable')
+      .select('ID, StartTime, EndTime, Date, Status')
+      .eq('Date', date)
+      .lt('StartTime', endTime)   // booking เริ่มก่อนเวลาสิ้นสุดที่เราจะจอง
+      .gt('EndTime', startTime)   // booking จบหลังเวลาเริ่มที่เราจะจอง
+      .neq('Status', 'Canceled')  // ไม่นับรายการที่ยกเลิกแล้ว
+
+    if (error) return rejectWithValue(error.message)
+
+    return data || []
+  }
+)
+
 const bookSlice = createSlice({
   name: 'book',
   initialState,
