@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store";
+import type { Booking as BookingType } from "../types/booking";
 import CustomButton from "./CustomButton";
 import LoadingSpinner from "./LoadingSpinner";
 
-type Booking = {
+type BookingRow = {
   id: number;
   customer: string;
   place: string;
@@ -14,33 +15,40 @@ type Booking = {
   Status: "Booking" | "Inprogress" | "Canceled" | "Completed";
 };
 
-const statusStyle: Record<Booking["Status"], string> = {
+interface BookingTableProps {
+  onEdit?: (booking: BookingType) => void;
+  onDelete?: (booking: BookingType) => void;
+}
+
+const statusStyle: Record<BookingRow["Status"], string> = {
   Booking: "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
   Inprogress: "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
   Canceled: "bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20",
   Completed: "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
 };
 
-const statusLabel: Record<Booking["Status"], string> = {
+const statusLabel: Record<BookingRow["Status"], string> = {
   Booking: "จองแล้ว",
   Inprogress: "กำลังดำเนินการ",
   Canceled: "ยกเลิก",
   Completed: "เสร็จสิ้น",
 };
 
-type SortKey = keyof Booking;
+type SortKey = keyof BookingRow;
 type Direction = "asc" | "desc";
 
-function BookingTable() {
+function BookingTable({ onEdit, onDelete }: BookingTableProps) {
   const bookState = useSelector((state: RootState) => state.book);
-  const bookings: Booking[] = (bookState.data || []).map((item: any) => ({
+  const rawBookings = bookState.data || [];
+
+  const bookings: BookingRow[] = rawBookings.map((item: any) => ({
     id: item.ID,
-    customer: item.CustomerMaster.CustomerName ?? '-',
-    place: item.LocationMaster.LocationName ?? '-',
+    customer: item.CustomerMaster?.CustomerName ?? '-',
+    place: item.LocationMaster?.LocationName ?? '-',
     start: item.StartTime ?? '-',
     end: item.EndTime ?? '-',
     date: item.Date ?? '-',
-    Status: (item.Status as Booking["Status"]) || 'Booking',
+    Status: (item.Status as BookingRow["Status"]) || 'Booking',
   }));
 
   const [sortKey, setSortKey] = useState<SortKey>("date");
@@ -66,14 +74,14 @@ function BookingTable() {
       }
 
       if (sortKey === "Status") {
-        const order: Record<Booking["Status"], number> = {
+        const order: Record<BookingRow["Status"], number> = {
           Booking: 4,
           Inprogress: 3,
           Completed: 2,
           Canceled: 1,
         };
-        valA = order[valA as Booking["Status"]];
-        valB = order[valB as Booking["Status"]];
+        valA = order[valA as BookingRow["Status"]];
+        valB = order[valB as BookingRow["Status"]];
       }
 
       if (valA > valB) return direction === "asc" ? 1 : -1;
@@ -91,6 +99,21 @@ function BookingTable() {
       setSortKey(key);
       setDirection("asc");
     }
+  };
+
+  // หาข้อมูล Booking ดิบจาก rawBookings โดยใช้ ID
+  const findRawBooking = (id: number): BookingType | undefined => {
+    return rawBookings.find((item) => item.ID === id);
+  };
+
+  const handleEdit = (id: number) => {
+    const booking = findRawBooking(id);
+    if (booking && onEdit) onEdit(booking);
+  };
+
+  const handleDelete = (id: number) => {
+    const booking = findRawBooking(id);
+    if (booking && onDelete) onDelete(booking);
   };
 
   const Arrow = ({ column }: { column: SortKey }) => (
@@ -168,10 +191,18 @@ function BookingTable() {
                 </td>
                 <td className="p-4">
                   <div className="flex justify-center gap-2">
-                    <CustomButton variant="secondary" className="!px-3 !py-1 text-xs">
+                    <CustomButton
+                      variant="secondary"
+                      className="!px-3 !py-1 text-xs"
+                      onClick={() => handleEdit(b.id)}
+                    >
                       Edit
                     </CustomButton>
-                    <CustomButton variant="danger" className="!px-3 !py-1 text-xs">
+                    <CustomButton
+                      variant="danger"
+                      className="!px-3 !py-1 text-xs"
+                      onClick={() => handleDelete(b.id)}
+                    >
                       Del
                     </CustomButton>
                   </div>
@@ -208,10 +239,20 @@ function BookingTable() {
             </div>
 
             <div className="flex gap-2 pt-3 border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
-              <CustomButton variant="secondary" fullWidth className="!py-2">
+              <CustomButton
+                variant="secondary"
+                fullWidth
+                className="!py-2"
+                onClick={() => handleEdit(b.id)}
+              >
                 Edit
               </CustomButton>
-              <CustomButton variant="danger" fullWidth className="!py-2">
+              <CustomButton
+                variant="danger"
+                fullWidth
+                className="!py-2"
+                onClick={() => handleDelete(b.id)}
+              >
                 Del
               </CustomButton>
             </div>

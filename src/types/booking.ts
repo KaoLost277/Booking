@@ -30,6 +30,8 @@ export interface Booking {
     Status: string | null;
     Notes: string | null;
     CustomerID: number | null;
+    LocationID: number | null;
+    JobType: number | null;
     CreatedID: string | null;
     // Relationships for Joined Queries
     CustomerMaster?: CustomerMaster;

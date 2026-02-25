@@ -8,6 +8,9 @@ import Test from "./test"
 import BookingModal from '../components/BookingModal';
 import { useAppDispatch } from "../hooks";
 import { fetchMasterData } from "../features/masterDataSlice";
+import { DeleteBook, bookGet } from "../features/bookSlice";
+import type { Booking } from "../types/booking";
+
 type AppLayoutProps = {
   title?: string;
   children?: React.ReactNode;
@@ -17,6 +20,9 @@ function BookingLayout({ }: AppLayoutProps) {
   const [showFab, setShowFab] = useState(false);
   const heroButtonRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<Booking | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -28,8 +34,44 @@ function BookingLayout({ }: AppLayoutProps) {
   }, []);
 
   const dispatch = useAppDispatch();
+
+  // เปิด Modal โหมดเพิ่มใหม่
   const handleNewBooking = () => {
+    setEditingBooking(null);
     setIsModalOpen(true);
+  };
+
+  // เปิด Modal โหมดแก้ไข
+  const handleEditBooking = (booking: Booking) => {
+    setEditingBooking(booking);
+    setIsModalOpen(true);
+  };
+
+  // ปิด Modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingBooking(null);
+  };
+
+  // เปิด Confirm ลบ
+  const handleDeleteBooking = (booking: Booking) => {
+    setDeleteConfirm(booking);
+  };
+
+  // ยืนยันการลบ
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
+    setDeleting(true);
+    try {
+      await dispatch(DeleteBook(deleteConfirm.ID)).unwrap();
+      await dispatch(bookGet());
+      setDeleteConfirm(null);
+    } catch (err) {
+      console.error('ลบรายการจองไม่สำเร็จ:', err);
+      alert(`เกิดข้อผิดพลาดในการลบ: ${err}`);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleTestMaster = async () => {
@@ -91,12 +133,57 @@ function BookingLayout({ }: AppLayoutProps) {
         </div>
 
         {/* Table */}
-        <BookingTable />
+        <BookingTable
+          onEdit={handleEditBooking}
+          onDelete={handleDeleteBooking}
+        />
       </main>
 
-      {/* Floating Action Button */}
-      <BookingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      {/* Booking Modal (เพิ่ม / แก้ไข) */}
+      <BookingModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        editingBooking={editingBooking}
+      />
 
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-white dark:bg-[#1a1a1a] rounded-xl shadow-2xl border border-[#e5e5e5] dark:border-[#2a2a2a] p-6">
+            <h3 className="text-lg font-semibold text-[#0d0d0d] dark:text-[#ececf1] mb-2">
+              ยืนยันการลบ
+            </h3>
+            <p className="text-sm text-[#6e6e80] dark:text-[#8e8ea0] mb-1">
+              คุณต้องการลบรายการจองนี้หรือไม่?
+            </p>
+            <div className="text-sm text-[#6e6e80] dark:text-[#8e8ea0] mb-5 bg-[#f7f7f8] dark:bg-[#0d0d0d] rounded-lg p-3 border border-[#e5e5e5] dark:border-[#2a2a2a]">
+              <p><strong>ลูกค้า:</strong> {deleteConfirm.CustomerMaster?.CustomerName || '-'}</p>
+              <p><strong>วันที่:</strong> {deleteConfirm.Date || '-'}</p>
+              <p><strong>เวลา:</strong> {deleteConfirm.StartTime?.slice(0, 5) || '-'} - {deleteConfirm.EndTime?.slice(0, 5) || '-'}</p>
+            </div>
+            <p className="text-xs text-red-500 mb-4">
+              ⚠️ การลบจะไม่สามารถกู้คืนได้
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <CustomButton
+                variant="secondary"
+                onClick={() => setDeleteConfirm(null)}
+                disabled={deleting}
+              >
+                ยกเลิก
+              </CustomButton>
+              <CustomButton
+                variant="danger"
+                onClick={confirmDelete}
+                loading={deleting}
+                disabled={deleting}
+              >
+                ลบรายการ
+              </CustomButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
