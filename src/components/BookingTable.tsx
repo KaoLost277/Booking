@@ -1,4 +1,8 @@
 import { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
+import CustomButton from "./CustomButton";
+import LoadingSpinner from "./LoadingSpinner";
 
 type Booking = {
   id: number;
@@ -10,104 +14,11 @@ type Booking = {
   Status: "Booking" | "Inprogress" | "Canceled" | "Completed";
 };
 
-const bookings: Booking[] = [
-  {
-    id: 1,
-    customer: "สมชาย ใจดี",
-    place: "Meeting Room A",
-    start: "09:00",
-    end: "10:30",
-    date: "2026-02-12",
-    Status: "Completed",
-  },
-  {
-    id: 2,
-    customer: "บริษัท ABC",
-    place: "Hall 2",
-    start: "13:00",
-    end: "15:00",
-    date: "2026-02-13",
-    Status: "Booking",
-  },
-  {
-    id: 3,
-    customer: "คุณมิน",
-    place: "Studio Room",
-    start: "18:00",
-    end: "20:00",
-    date: "2026-02-12",
-    Status: "Canceled",
-  },
-  {
-    id: 4,
-    customer: "คุณxd",
-    place: "Studio Room",
-    start: "18:00",
-    end: "20:00",
-    date: "2026-02-12",
-    Status: "Canceled",
-  },
-  {
-    id: 5,
-    customer: "คุณ3312",
-    place: "Studio Room",
-    start: "18:00",
-    end: "20:00",
-    date: "2026-02-12",
-    Status: "Canceled",
-  },
-  {
-    id: 6,
-    customer: "บริษัท TechSoft",
-    place: "Meeting Room B",
-    start: "10:00",
-    end: "12:00",
-    date: "2026-02-14",
-    Status: "Completed",
-  },
-  {
-    id: 7,
-    customer: "คุณแพรว",
-    place: "Hall 1",
-    start: "08:30",
-    end: "11:30",
-    date: "2026-02-15",
-    Status: "Inprogress",
-  },
-  {
-    id: 8,
-    customer: "Startup XYZ",
-    place: "Conference Room",
-    start: "14:00",
-    end: "17:00",
-    date: "2026-02-15",
-    Status: "Completed",
-  },
-  {
-    id: 9,
-    customer: "คุณบอย",
-    place: "Studio Room",
-    start: "12:00",
-    end: "13:30",
-    date: "2026-02-16",
-    Status: "Booking",
-  },
-  {
-    id: 10,
-    customer: "Creative Team",
-    place: "Hall 3",
-    start: "16:00",
-    end: "19:00",
-    date: "2026-02-16",
-    Status: "Completed",
-  },
-];
-
 const statusStyle: Record<Booking["Status"], string> = {
-  Booking: "bg-amber-100 text-amber-700",
-  Inprogress: "bg-sky-100 text-sky-700",
-  Canceled: "bg-rose-100 text-rose-700",
-  Completed: "bg-emerald-100 text-emerald-700",
+  Booking: "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
+  Inprogress: "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
+  Canceled: "bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20",
+  Completed: "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
 };
 
 const statusLabel: Record<Booking["Status"], string> = {
@@ -121,13 +32,21 @@ type SortKey = keyof Booking;
 type Direction = "asc" | "desc";
 
 function BookingTable() {
-  const [todayOnly, setTodayOnly] = useState(false);
+  const bookState = useSelector((state: RootState) => state.book);
+  const bookings: Booking[] = (bookState.data || []).map((item: any) => ({
+    id: item.ID,
+    customer: item.CustomerMaster.CustomerName ?? '-',
+    place: item.LocationMaster.LocationName ?? '-',
+    start: item.StartTime ?? '-',
+    end: item.EndTime ?? '-',
+    date: item.Date ?? '-',
+    Status: (item.Status as Booking["Status"]) || 'Booking',
+  }));
+
   const [sortKey, setSortKey] = useState<SortKey>("date");
   const [direction, setDirection] = useState<Direction>("asc");
 
-  const today = new Date().toISOString().slice(0, 10);
-
-  const filtered = todayOnly ? bookings.filter((b) => b.date === today) : bookings;
+  const filtered = bookings;
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("th-TH-u-ca-gregory", {
@@ -175,72 +94,86 @@ function BookingTable() {
   };
 
   const Arrow = ({ column }: { column: SortKey }) => (
-    <span className="ml-1 text-xs">{sortKey === column ? (direction === "asc" ? "▲" : "▼") : "↕"}</span>
+    <span className="ml-1 text-xs opacity-50">
+      {sortKey === column ? (direction === "asc" ? "▲" : "▼") : "↕"}
+    </span>
   );
 
   const Th = ({ label, column }: { label: string; column: SortKey }) => (
-    <th onClick={() => handleSort(column)} className="p-4 cursor-pointer select-none hover:bg-white/10 transition">
+    <th
+      onClick={() => handleSort(column)}
+      className="p-4 cursor-pointer select-none text-left text-xs font-medium uppercase tracking-wider text-[#6e6e80] dark:text-[#8e8ea0] hover:text-[#0d0d0d] dark:hover:text-[#ececf1] transition-colors"
+    >
       <div className="flex items-center gap-1">
         {label} <Arrow column={column} />
       </div>
     </th>
   );
 
+  if (bookState.loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <LoadingSpinner size="lg" />
+        <p className="mt-4 text-[#6e6e80] dark:text-[#8e8ea0] font-medium animate-pulse">
+          กำลังโหลดข้อมูลการจอง...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-4">
-      {/* Filter */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => setTodayOnly(!todayOnly)}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
-          ${
-            todayOnly
-              ? "bg-violet-600 text-white shadow-lg shadow-violet-300/40 scale-105"
-              : "bg-white text-gray-600 border border-gray-200 hover:bg-violet-50"
-          }`}
-        >
-          วันนี้
-        </button>
-      </div>
-
       {/* Desktop Table */}
-      <div className="hidden md:block overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] transition-colors">
         <table className="w-full text-sm">
-          <thead className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white">
-            <tr className="text-left">
+          <thead className="bg-[#f7f7f8] dark:bg-[#1a1a1a] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+            <tr>
               <Th label="วันที่" column="date" />
               <Th label="ลูกค้า" column="customer" />
-              <Th label="ชื่อสถานที่" column="place" />
+              <Th label="สถานที่" column="place" />
               <Th label="เวลาเริ่ม" column="start" />
               <Th label="สิ้นสุดเวลา" column="end" />
               <Th label="สถานะ" column="Status" />
-              <th className="p-4 text-center">จัดการ</th>
+              <th className="p-4 text-center text-xs font-medium uppercase tracking-wider text-[#6e6e80] dark:text-[#8e8ea0]">
+                จัดการ
+              </th>
             </tr>
           </thead>
 
-          <tbody className="divide-y bg-white">
+          <tbody className="divide-y divide-[#e5e5e5] dark:divide-[#2a2a2a] bg-white dark:bg-[#0d0d0d]">
             {sorted.map((b) => (
-              <tr key={b.id} className="hover:bg-violet-50 transition-colors">
-                <td className="p-4 font-medium text-gray-700">{formatDate(b.date)}</td>
-                <td className="p-4 font-medium text-gray-700">{b.customer}</td>
-                <td className="p-4">{b.place}</td>
-                <td className="p-4">{b.start}</td>
-                <td className="p-4">{b.end}</td>
-
+              <tr
+                key={b.id}
+                className="hover:bg-[#f7f7f8] dark:hover:bg-[#1a1a1a] transition-colors"
+              >
+                <td className="p-4 font-medium text-[#0d0d0d] dark:text-[#ececf1]">
+                  {formatDate(b.date)}
+                </td>
+                <td className="p-4 font-medium text-[#0d0d0d] dark:text-[#ececf1]">
+                  {b.customer}
+                </td>
+                <td className="p-4 text-[#6e6e80] dark:text-[#8e8ea0]">
+                  {b.place}
+                </td>
+                <td className="p-4 text-[#6e6e80] dark:text-[#8e8ea0] font-mono text-xs">
+                  {b.start}
+                </td>
+                <td className="p-4 text-[#6e6e80] dark:text-[#8e8ea0] font-mono text-xs">
+                  {b.end}
+                </td>
                 <td className="p-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle[b.Status]}`}>
+                  <span className={`inline-flex px-2.5 py-1 rounded-md text-xs font-medium ${statusStyle[b.Status]}`}>
                     {statusLabel[b.Status]}
                   </span>
                 </td>
-
                 <td className="p-4">
                   <div className="flex justify-center gap-2">
-                    <button className="px-3 py-1 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white text-xs transition">
+                    <CustomButton variant="secondary" className="!px-3 !py-1 text-xs">
                       Edit
-                    </button>
-                    <button className="px-3 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-xs transition">
+                    </CustomButton>
+                    <CustomButton variant="danger" className="!px-3 !py-1 text-xs">
                       Del
-                    </button>
+                    </CustomButton>
                   </div>
                 </td>
               </tr>
@@ -250,36 +183,37 @@ function BookingTable() {
       </div>
 
       {/* Mobile Cards */}
-      <div className="md:hidden space-y-4">
+      <div className="md:hidden space-y-3">
         {sorted.map((b) => (
-          <div key={b.id} className="rounded-2xl border border-gray-200 shadow-sm p-4 bg-white">
-            <div className="flex justify-between items-start mb-2">
+          <div
+            key={b.id}
+            className="rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] p-4 bg-white dark:bg-[#1a1a1a] transition-colors"
+          >
+            <div className="flex justify-between items-start mb-3">
               <div>
-                <p className="font-semibold text-gray-800">{b.customer}</p>
-                <p className="text-sm text-gray-500">{b.place}</p>
+                <p className="font-medium text-[#0d0d0d] dark:text-[#ececf1]">{b.customer}</p>
+                <p className="text-sm text-[#6e6e80] dark:text-[#8e8ea0]">{b.place}</p>
               </div>
-
-              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle[b.Status]}`}>
+              <span className={`inline-flex px-2.5 py-1 rounded-md text-xs font-medium ${statusStyle[b.Status]}`}>
                 {statusLabel[b.Status]}
               </span>
             </div>
 
-            {/*เพิ่ม date ใน mobile */}
-            <div className="text-sm text-gray-600 mb-3 space-y-1">
+            <div className="text-sm text-[#6e6e80] dark:text-[#8e8ea0] mb-3 space-y-1">
               <p>
-                วันที่: <span className="font-medium text-gray-800">{formatDate(b.date)}</span>
+                วันที่: <span className="font-medium text-[#0d0d0d] dark:text-[#ececf1]">{formatDate(b.date)}</span>
               </p>
-              <p>เริ่ม: {b.start}</p>
-              <p>สิ้นสุด: {b.end}</p>
+              <p>เริ่ม: <span className="font-mono text-xs">{b.start}</span></p>
+              <p>สิ้นสุด: <span className="font-mono text-xs">{b.end}</span></p>
             </div>
 
-            <div className="flex gap-2">
-              <button className="flex-1 py-2 rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 transition">
+            <div className="flex gap-2 pt-3 border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
+              <CustomButton variant="secondary" fullWidth className="!py-2">
                 Edit
-              </button>
-              <button className="flex-1 py-2 rounded-lg bg-rose-500 text-white hover:bg-rose-600 transition">
+              </CustomButton>
+              <CustomButton variant="danger" fullWidth className="!py-2">
                 Del
-              </button>
+              </CustomButton>
             </div>
           </div>
         ))}
