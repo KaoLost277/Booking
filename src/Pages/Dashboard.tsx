@@ -315,7 +315,7 @@ const DashboardPage: React.FC = () => {
                             ))}
                         </div>
                     </div>
-                    <div className="h-72 sm:h-80">
+                    <div className="h-72 sm:h-80 min-w-0 overflow-hidden">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={trendData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                                 <defs>
@@ -346,7 +346,7 @@ const DashboardPage: React.FC = () => {
                         <h2 className="text-base font-semibold text-[#0d0d0d] dark:text-[#ececf1] mb-4">
                             🍩 สัดส่วนสถานะการจอง
                         </h2>
-                        <div className="h-56 flex items-center justify-center">
+                        <div className="h-56 flex items-center justify-center min-w-0 overflow-hidden">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
@@ -389,7 +389,7 @@ const DashboardPage: React.FC = () => {
                         <h2 className="text-base font-semibold text-[#0d0d0d] dark:text-[#ececf1] mb-4">
                             📊 จำนวนการจองรายวัน (7 วันล่าสุด)
                         </h2>
-                        <div className="h-64">
+                        <div className="h-64 min-w-0 overflow-hidden">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={dailyData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#2a2a2a' : '#e5e5e5'} />
@@ -515,7 +515,7 @@ function KpiCard({ icon, label, value, color }: { icon: React.ReactNode; label: 
                 </div>
             </div>
             <p className="text-xs font-medium text-[#6e6e80] dark:text-[#8e8ea0] uppercase tracking-wider mb-1">{label}</p>
-            <p className="text-xl sm:text-2xl font-bold text-[#0d0d0d] dark:text-[#ececf1] tracking-tight">{value}</p>
+            <p className="text-xl sm:text-2xl font-bold text-[#0d0d0d] dark:text-[#ececf1] tracking-tight truncate min-w-0" title={value}>{value}</p>
         </div>
     )
 }

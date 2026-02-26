@@ -21,11 +21,11 @@ type NavbarsProps = {
 };
 
 const defaultItems: NavItem[] = [
-  { label: "Booking", to: PATH.HOME, end: true },
+  { label: "Dashboard", to: PATH.DASHBOARD, end: true },
+  { label: "Booking", to: PATH.BOOKING },
   { label: "Customer", to: PATH.CUSTOMER },
   { label: "Location", to: PATH.LOCATION },
   { label: "Job Type", to: PATH.JOB_TYPE },
-  { label: "Dashboard", to: PATH.DASHBOARD },
 ];
 
 export default function Navbars({
@@ -46,7 +46,7 @@ export default function Navbars({
 
   useEffect(() => {
     const onResize = () => {
-      if (window.innerWidth >= 768) setOpen(false);
+      if (window.innerWidth >= 1024) setOpen(false);
     };
     window.addEventListener("resize", onResize, { passive: true });
     return () => window.removeEventListener("resize", onResize);
@@ -106,7 +106,7 @@ export default function Navbars({
           </Link>
 
           {/* Desktop links */}
-          <div className="hidden items-center gap-1 md:flex">
+          <div className="hidden items-center gap-1 lg:flex">
             {items.map((it) => (
               <NavLink
                 key={it.to}
@@ -142,7 +142,7 @@ export default function Navbars({
               type="button"
               onClick={handleSignOut}
               disabled={loading}
-              className="hidden md:inline-flex items-center justify-center rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-[#0d0d0d] dark:text-[#ececf1] transition-colors hover:bg-[#f7f7f8] dark:hover:bg-[#2a2a2a] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#a3a3a3] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="hidden lg:inline-flex items-center justify-center rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-[#0d0d0d] dark:text-[#ececf1] transition-colors hover:bg-[#f7f7f8] dark:hover:bg-[#2a2a2a] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#a3a3a3] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing out...' : cta.label}
             </button>
@@ -150,7 +150,7 @@ export default function Navbars({
             {/* Mobile button */}
             <button
               type="button"
-              className="inline-flex md:hidden items-center justify-center rounded-lg p-2 text-[#0d0d0d] dark:text-[#ececf1] hover:bg-[#f7f7f8] dark:hover:bg-[#2a2a2a] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#a3a3a3]"
+              className="inline-flex lg:hidden items-center justify-center rounded-lg p-2 text-[#0d0d0d] dark:text-[#ececf1] hover:bg-[#f7f7f8] dark:hover:bg-[#2a2a2a] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#a3a3a3]"
               aria-label="Toggle menu"
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
@@ -169,7 +169,7 @@ export default function Navbars({
         {/* Mobile dropdown */}
         <div
           className={[
-            "md:hidden overflow-hidden transition-[max-height,opacity] duration-300",
+            "lg:hidden overflow-hidden transition-[max-height,opacity] duration-300",
             open ? "max-h-[420px] opacity-100" : "max-h-0 opacity-0",
           ].join(" ")}
         >

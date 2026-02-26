@@ -320,7 +320,7 @@ function BookingTable({ onEdit, onDelete, filters }: BookingTableProps) {
               <p>สิ้นสุด: <span className="font-mono text-xs">{b.end}</span></p>
             </div>
 
-            <div className="flex gap-2 pt-3 border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
+            <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
               <CustomButton
                 variant="secondary"
                 fullWidth
