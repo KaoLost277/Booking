@@ -16,6 +16,7 @@ import Test from "./Pages/test"
 import CustomerMaster from "./Pages/CustomerMaster"
 import LocationMaster from "./Pages/LocationMaster"
 import JobTypeMaster from "./Pages/JobTypeMaster"
+import Dashboard from "./Pages/Dashboard"
 import { ThemeProvider } from "./contexts/ThemeContext"
 
 // initialize supabase client and sync session to redux store
@@ -58,6 +59,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <JobTypeMaster />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: PATH.DASHBOARD,
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
       </ProtectedRoute>
     ),
   },
