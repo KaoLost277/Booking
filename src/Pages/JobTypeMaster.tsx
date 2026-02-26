@@ -155,10 +155,10 @@ const JobTypeMasterPage: React.FC = () => {
                                             <td className="p-4">
                                                 <div className="flex flex-col">
                                                     <div className="flex items-center gap-1.5 text-sm text-[#0d0d0d] dark:text-[#ececf1] font-medium">
-                                                        {Number((jobType.PriceUnitMinutes * 60).toFixed(2)).toLocaleString()} บาท/ชั่วโมง
+                                                        {(jobType.PriceUnitMinutes * 60).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท/ชั่วโมง
                                                     </div>
                                                     <span className="text-xs text-[#6e6e80] dark:text-[#8e8ea0] ml-5">
-                                                        (หรือ {Number(jobType.PriceUnitMinutes).toFixed(2)} บาท/นาที)
+                                                        (หรือ {jobType.PriceUnitMinutes.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท/นาที)
                                                     </span>
                                                 </div>
                                             </td>
@@ -219,7 +219,7 @@ const JobTypeMasterPage: React.FC = () => {
                                             <span>{jobType.MinTimeMinutes % 60 === 0 ? `${jobType.MinTimeMinutes / 60} ชั่วโมง` : `${jobType.MinTimeMinutes} นาที`}</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-[#0d0d0d] dark:text-[#ececf1] font-medium border border-[#e5e5e5] dark:border-[#2a2a2a] rounded-lg p-2.5 bg-[#f7f7f8] dark:bg-[#0d0d0d] text-sm flex-wrap">
-                                            <span>{Number((jobType.PriceUnitMinutes * 60).toFixed(2)).toLocaleString()} บาท/ชม.</span>
+                                            <span>{(jobType.PriceUnitMinutes * 60).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท/ชม.</span>
                                         </div>
                                     </div>
 

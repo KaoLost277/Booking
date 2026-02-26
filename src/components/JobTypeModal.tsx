@@ -17,7 +17,7 @@ interface FormValues {
     typeName: string;
     unit: 'm' | 'h';
     minTimeVal: number;
-    priceVal: number;
+    priceVal: string;
 }
 
 const JobTypeModal: React.FC<JobTypeModalProps> = ({ isOpen, onClose, editingJobType }) => {
@@ -30,13 +30,14 @@ const JobTypeModal: React.FC<JobTypeModalProps> = ({ isOpen, onClose, editingJob
         handleSubmit,
         reset,
         watch,
+        setValue,
         formState: { errors }
     } = useForm<FormValues>({
         defaultValues: {
             typeName: '',
             unit: 'h',
             minTimeVal: 1,
-            priceVal: 0
+            priceVal: "0.00"
         }
     });
 
@@ -46,21 +47,20 @@ const JobTypeModal: React.FC<JobTypeModalProps> = ({ isOpen, onClose, editingJob
         if (isOpen && editingJobType) {
             // Default to hour if it's divisible by 60 for cleaner UI
             const isHour = editingJobType.MinTimeMinutes % 60 === 0;
+            const tempPrice = isHour ? (editingJobType.PriceUnitMinutes * 60) : editingJobType.PriceUnitMinutes;
+
             reset({
                 typeName: editingJobType.TypeName || '',
                 unit: isHour ? 'h' : 'm',
                 minTimeVal: isHour ? editingJobType.MinTimeMinutes / 60 : editingJobType.MinTimeMinutes,
-                // priceUnitMinutes in DB currently holds "Price per Minute" if we follow logic, or "Price per Unit".
-                // If they say "convert ชั่วโมงเก็บเป็นนาที", we assume DB stores the pure per-hour rate or per-minute rate.
-                // Let's assume DB stores Price per Minute. So if they view in hours, priceVal = DB * 60.
-                priceVal: isHour ? (editingJobType.PriceUnitMinutes * 60) : editingJobType.PriceUnitMinutes
+                priceVal: tempPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             })
         } else if (isOpen && !editingJobType) {
             reset({
                 typeName: '',
                 unit: 'h',
                 minTimeVal: 1,
-                priceVal: 0
+                priceVal: "0.00"
             })
         }
     }, [isOpen, editingJobType, reset])
@@ -73,7 +73,8 @@ const JobTypeModal: React.FC<JobTypeModalProps> = ({ isOpen, onClose, editingJob
             // MinTimeMinutes = hours * 60
             // PriceUnitMinutes = pricePerHour / 60 (so price per minute)
             const minMins = isHour ? Number(data.minTimeVal) * 60 : Number(data.minTimeVal);
-            const priceMins = isHour ? Number(data.priceVal) / 60 : Number(data.priceVal);
+            const numPrice = Number(String(data.priceVal).replace(/,/g, ''));
+            const priceMins = isHour ? numPrice / 60 : numPrice;
 
             const jobTypeData = {
                 TypeName: data.typeName,
@@ -163,12 +164,24 @@ const JobTypeModal: React.FC<JobTypeModalProps> = ({ isOpen, onClose, editingJob
                     <div className="space-y-1">
                         <CustomInput
                             label={`ราคาเริ่มต้น (${selectedUnit === 'h' ? 'บาท/ชั่วโมง' : 'บาท/นาที'})`}
-                            type="number"
-                            step="any"
-                            placeholder={selectedUnit === 'h' ? "500" : "8.33"}
+                            type="text"
+                            placeholder={selectedUnit === 'h' ? "500.00" : "8.33"}
                             {...register("priceVal", {
                                 required: "กรุณาระบุราคาเริ่มต้น",
-                                min: { value: 0, message: "ต้องไม่เป็นค่าติดลบ" }
+                                validate: value => {
+                                    const num = Number(String(value).replace(/,/g, ''));
+                                    return (!isNaN(num) && num >= 0) || "ต้องไม่เป็นค่าติดลบและเป็นตัวเลขที่ถูกต้อง";
+                                },
+                                onChange: (e) => {
+                                    let val = e.target.value.replace(/[^0-9.,]/g, '');
+                                    e.target.value = val;
+                                },
+                                onBlur: (e) => {
+                                    let val = e.target.value.replace(/,/g, '');
+                                    if (!isNaN(Number(val)) && val !== '') {
+                                        setValue("priceVal", Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                                    }
+                                }
                             })}
                         />
                         {errors.priceVal && <p className="text-xs text-red-500">{errors.priceVal.message}</p>}
