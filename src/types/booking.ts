@@ -4,6 +4,7 @@ export interface CustomerMaster {
     CustomerName: string;
     FacebookIink: string;
     ActiveStatus?: boolean | null;
+    BookingTable?: { count: number }[];
 }
 
 export interface LocationMaster {

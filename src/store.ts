@@ -4,6 +4,8 @@ import authReducer from './features/authSlice'
 import bookReducer from './features/bookSlice'
 import masterDataReducer from './features/masterDataSlice'
 import customerReducer from './features/customerSlice'
+import locationReducer from './features/locationSlice'
+import jobTypeReducer from './features/jobTypeSlice'
 
 
 export const store = configureStore({
@@ -12,7 +14,9 @@ export const store = configureStore({
     auth: authReducer,
     book: bookReducer,
     masterData: masterDataReducer,
-    customer: customerReducer
+    customer: customerReducer,
+    location: locationReducer,
+    jobType: jobTypeReducer
     // <-- ใส่ api reducer
   } // <-- ใส่ api middleware
 })
