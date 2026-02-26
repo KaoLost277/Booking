@@ -18,10 +18,10 @@ const initialState: MasterDataState = {
     customers: [],
     locations: [],
     statusOptions: [
-        { id: 'Booking', label: 'Booking (จอง)' },
-        { id: 'Inprogress', label: 'กำลังดำเนินการ' },
-        { id: 'Completed', label: 'เสร็จสิ้น' },
-        { id: 'Canceled', label: 'ยกเลิก' }
+        { id: 'Booking', label: 'Booking' },
+        { id: 'Inprogress', label: 'Inprogress' },
+        { id: 'Completed', label: 'Completed' },
+        { id: 'Canceled', label: 'Canceled' }
     ],
     loading: false,
     error: null

@@ -23,6 +23,8 @@ type NavbarsProps = {
 const defaultItems: NavItem[] = [
   { label: "Booking", to: PATH.HOME, end: true },
   { label: "Customer", to: PATH.CUSTOMER },
+  { label: "Location", to: PATH.LOCATION },
+  { label: "Job Type", to: PATH.JOB_TYPE },
   { label: "Dashboard", to: PATH.DASHBOARD },
 ];
 

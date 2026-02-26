@@ -14,6 +14,8 @@ import { createClient } from "./lib/client"
 import { setSession } from "./features/authSlice"
 import Test from "./Pages/test"
 import CustomerMaster from "./Pages/CustomerMaster"
+import LocationMaster from "./Pages/LocationMaster"
+import JobTypeMaster from "./Pages/JobTypeMaster"
 import { ThemeProvider } from "./contexts/ThemeContext"
 
 // initialize supabase client and sync session to redux store
@@ -40,6 +42,22 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <CustomerMaster />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: PATH.LOCATION,
+    element: (
+      <ProtectedRoute>
+        <LocationMaster />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: PATH.JOB_TYPE,
+    element: (
+      <ProtectedRoute>
+        <JobTypeMaster />
       </ProtectedRoute>
     ),
   },

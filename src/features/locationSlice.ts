@@ -1,71 +1,67 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { createClient } from '../lib/client'
-import type { CustomerMaster } from '../types/booking'
+import type { LocationMaster } from '../types/booking'
 
 const supabase = createClient()
 
-type CustomerState = {
-    data: CustomerMaster[]
+type LocationState = {
+    data: LocationMaster[]
     loading: boolean
     error: string | null
 }
 
-const initialState: CustomerState = {
+const initialState: LocationState = {
     data: [],
     loading: false,
     error: null
 }
 
-// Fetch all active customers
-export const fetchCustomers = createAsyncThunk(
-    'customer/fetchAll',
+export const fetchLocations = createAsyncThunk(
+    'location/fetchAll',
     async (_, { rejectWithValue }) => {
         const { data, error } = await supabase
-            .from('CustomerMaster')
-            .select('*, BookingTable(count)')
+            .from('LocationMaster')
+            .select('*')
             .eq('ActiveStatus', true)
             .order('ID', { ascending: false })
 
         if (error) return rejectWithValue(error.message)
-        return data as CustomerMaster[]
+        return data as LocationMaster[]
     }
 )
 
-// Add new customer
-export const addCustomer = createAsyncThunk(
-    'customer/add',
-    async (newCustomer: Partial<CustomerMaster>, { rejectWithValue }) => {
+export const addLocation = createAsyncThunk(
+    'location/add',
+    async (newLocation: Partial<LocationMaster>, { rejectWithValue }) => {
         const { data, error } = await supabase
-            .from('CustomerMaster')
-            .insert([newCustomer])
+            .from('LocationMaster')
+            .insert([newLocation])
             .select()
 
         if (error) return rejectWithValue(error.message)
-        return data[0] as CustomerMaster
+        return data[0] as LocationMaster
     }
 )
 
-// Update customer
-export const updateCustomer = createAsyncThunk(
-    'customer/update',
-    async ({ id, updates }: { id: number; updates: Partial<CustomerMaster> }, { rejectWithValue }) => {
+export const updateLocation = createAsyncThunk(
+    'location/update',
+    async ({ id, updates }: { id: number; updates: Partial<LocationMaster> }, { rejectWithValue }) => {
         const { data, error } = await supabase
-            .from('CustomerMaster')
+            .from('LocationMaster')
             .update(updates)
             .eq('ID', id)
             .select()
 
         if (error) return rejectWithValue(error.message)
-        return data[0] as CustomerMaster
+        return data[0] as LocationMaster
     }
 )
 
-// Soft delete customer (set ActiveStatus to false)
-export const deleteCustomer = createAsyncThunk(
-    'customer/delete',
+export const deleteLocation = createAsyncThunk(
+    'location/delete',
     async (id: number, { rejectWithValue }) => {
         const { error } = await supabase
-            .from('CustomerMaster')
+            .from('LocationMaster')
             .update({ ActiveStatus: false })
             .eq('ID', id)
 
@@ -74,41 +70,37 @@ export const deleteCustomer = createAsyncThunk(
     }
 )
 
-const customerSlice = createSlice({
-    name: 'customer',
+const locationSlice = createSlice({
+    name: 'location',
     initialState,
     reducers: {},
     extraReducers: (builder) => {
         builder
-            // Fetch
-            .addCase(fetchCustomers.pending, (state) => {
+            .addCase(fetchLocations.pending, (state) => {
                 state.loading = true
                 state.error = null
             })
-            .addCase(fetchCustomers.fulfilled, (state, action) => {
+            .addCase(fetchLocations.fulfilled, (state, action) => {
                 state.loading = false
                 state.data = action.payload
             })
-            .addCase(fetchCustomers.rejected, (state, action) => {
+            .addCase(fetchLocations.rejected, (state, action) => {
                 state.loading = false
                 state.error = action.payload as string
             })
-            // Add
-            .addCase(addCustomer.fulfilled, (state, action) => {
+            .addCase(addLocation.fulfilled, (state, action) => {
                 state.data.unshift(action.payload)
             })
-            // Update
-            .addCase(updateCustomer.fulfilled, (state, action) => {
+            .addCase(updateLocation.fulfilled, (state, action) => {
                 const index = state.data.findIndex(c => c.ID === action.payload.ID)
                 if (index !== -1) {
                     state.data[index] = action.payload
                 }
             })
-            // Delete
-            .addCase(deleteCustomer.fulfilled, (state, action) => {
+            .addCase(deleteLocation.fulfilled, (state, action) => {
                 state.data = state.data.filter(c => c.ID !== action.payload)
             })
     }
 })
 
-export default customerSlice.reducer
+export default locationSlice.reducer

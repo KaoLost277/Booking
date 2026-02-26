@@ -18,7 +18,11 @@ type BookingRow = {
   end: string;
   date: string;
   Status: "Booking" | "Inprogress" | "Canceled" | "Completed";
+  price: number;
+  summary: number;
 };
+
+import { Calendar, Clock, Activity } from 'lucide-react';
 
 interface BookingTableProps {
   onEdit?: (booking: BookingType) => void;
@@ -34,10 +38,10 @@ const statusStyle: Record<BookingRow["Status"], string> = {
 };
 
 const statusLabel: Record<BookingRow["Status"], string> = {
-  Booking: "จองแล้ว",
-  Inprogress: "กำลังดำเนินการ",
-  Canceled: "ยกเลิก",
-  Completed: "เสร็จสิ้น",
+  Booking: "Booking",
+  Inprogress: "Inprogress",
+  Canceled: "Canceled",
+  Completed: "Completed",
 };
 
 type SortKey = keyof BookingRow;
@@ -59,6 +63,8 @@ function BookingTable({ onEdit, onDelete, filters }: BookingTableProps) {
     end: item.EndTime ?? '-',
     date: item.Date ?? '-',
     Status: (item.Status as BookingRow["Status"]) || 'Booking',
+    price: item.Price || 0,
+    summary: item.Summary || 0,
   }));
 
   const [sortKey, setSortKey] = useState<SortKey>("date");
@@ -84,12 +90,18 @@ function BookingTable({ onEdit, onDelete, filters }: BookingTableProps) {
     });
   }, [bookings, filters]);
 
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString("th-TH-u-ca-gregory", {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-    });
+  const formatDate = (date: string) => {
+    try {
+      if (!date || date === '-') return '-';
+      const d = new Date(date);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    } catch {
+      return date;
+    }
+  };
 
   const sorted = useMemo(() => {
     const sortedData = [...filtered].sort((a, b) => {
@@ -185,16 +197,15 @@ function BookingTable({ onEdit, onDelete, filters }: BookingTableProps) {
       )}
 
       {/* Desktop Table */}
-      <div className="hidden md:block overflow-x-auto rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] transition-colors">
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] transition-colors bg-[#fafafa] dark:bg-[#111111]">
         <table className="w-full text-sm">
           <thead className="bg-[#f7f7f8] dark:bg-[#1a1a1a] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
             <tr>
-              <Th label="วันที่" column="date" />
+              <Th label="วันที่ / เวลา" column="date" />
               <Th label="ลูกค้า" column="customer" />
-              <Th label="สถานที่" column="place" />
               <Th label="ประเภทงาน" column="jobType" />
-              <Th label="เวลาเริ่ม" column="start" />
-              <Th label="สิ้นสุดเวลา" column="end" />
+              <Th label="สถานที่" column="place" />
+              <Th label="ยอดสุทธิ" column="summary" />
               <Th label="สถานะ" column="Status" />
               <th className="p-4 text-center text-xs font-medium uppercase tracking-wider text-[#6e6e80] dark:text-[#8e8ea0]">
                 จัดการ
@@ -205,7 +216,7 @@ function BookingTable({ onEdit, onDelete, filters }: BookingTableProps) {
           <tbody className="divide-y divide-[#e5e5e5] dark:divide-[#2a2a2a] bg-white dark:bg-[#0d0d0d]">
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={8} className="p-8 text-center text-[#6e6e80] dark:text-[#8e8ea0]">
+                <td colSpan={7} className="p-8 text-center text-[#6e6e80] dark:text-[#8e8ea0]">
                   ไม่พบข้อมูลการจอง
                 </td>
               </tr>
@@ -214,26 +225,44 @@ function BookingTable({ onEdit, onDelete, filters }: BookingTableProps) {
                 key={b.id}
                 className="hover:bg-[#f7f7f8] dark:hover:bg-[#1a1a1a] transition-colors"
               >
-                <td className="p-4 font-medium text-[#0d0d0d] dark:text-[#ececf1]">
-                  {formatDate(b.date)}
+                <td className="p-4">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2 font-semibold text-[#0d0d0d] dark:text-[#ececf1]">
+                      <Calendar className="w-4 h-4 text-[#6e6e80] dark:text-[#8e8ea0]" />
+                      {formatDate(b.date)}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-[#6e6e80] dark:text-[#8e8ea0]">
+                      <Clock className="w-3 h-3" />
+                      {b.start.slice(0, 5)} - {b.end.slice(0, 5)}
+                    </div>
+                  </div>
                 </td>
                 <td className="p-4 font-medium text-[#0d0d0d] dark:text-[#ececf1]">
                   {b.customer}
                 </td>
+                <td className="p-4 font-medium text-[#0d0d0d] dark:text-[#ececf1]">
+                  {b.jobType}
+                </td>
                 <td className="p-4 text-[#6e6e80] dark:text-[#8e8ea0]">
                   {b.place}
                 </td>
-                <td className="p-4 text-[#6e6e80] dark:text-[#8e8ea0]">
-                  {b.jobType}
-                </td>
-                <td className="p-4 text-[#6e6e80] dark:text-[#8e8ea0] font-mono text-xs">
-                  {b.start}
-                </td>
-                <td className="p-4 text-[#6e6e80] dark:text-[#8e8ea0] font-mono text-xs">
-                  {b.end}
+                <td className="p-4">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-1.5 font-bold text-[#0d0d0d] dark:text-[#ececf1]">
+                      {b.summary.toLocaleString()} บาท
+                    </div>
+                    <div className="text-[11px] text-[#6e6e80] dark:text-[#8e8ea0]">
+                      (ราคา: {b.price.toLocaleString()} บาท)
+                    </div>
+                  </div>
                 </td>
                 <td className="p-4">
-                  <span className={`inline-flex px-2.5 py-1 rounded-md text-xs font-medium ${statusStyle[b.Status]}`}>
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${b.Status === 'Booking' ? 'bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20' :
+                    b.Status === 'Completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' :
+                      b.Status === 'Inprogress' ? 'bg-amber-50 text-amber-600 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' :
+                        'bg-red-50 text-red-600 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'
+                    }`}>
+                    <Activity className="w-3.5 h-3.5" />
                     {statusLabel[b.Status]}
                   </span>
                 </td>

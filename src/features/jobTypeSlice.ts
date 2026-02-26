@@ -1,71 +1,67 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { createClient } from '../lib/client'
-import type { CustomerMaster } from '../types/booking'
+import type { JobTypeMaster } from '../types/booking'
 
 const supabase = createClient()
 
-type CustomerState = {
-    data: CustomerMaster[]
+type JobTypeState = {
+    data: JobTypeMaster[]
     loading: boolean
     error: string | null
 }
 
-const initialState: CustomerState = {
+const initialState: JobTypeState = {
     data: [],
     loading: false,
     error: null
 }
 
-// Fetch all active customers
-export const fetchCustomers = createAsyncThunk(
-    'customer/fetchAll',
+export const fetchJobTypes = createAsyncThunk(
+    'jobType/fetchAll',
     async (_, { rejectWithValue }) => {
         const { data, error } = await supabase
-            .from('CustomerMaster')
-            .select('*, BookingTable(count)')
+            .from('JobTypeMaster')
+            .select('*')
             .eq('ActiveStatus', true)
             .order('ID', { ascending: false })
 
         if (error) return rejectWithValue(error.message)
-        return data as CustomerMaster[]
+        return data as JobTypeMaster[]
     }
 )
 
-// Add new customer
-export const addCustomer = createAsyncThunk(
-    'customer/add',
-    async (newCustomer: Partial<CustomerMaster>, { rejectWithValue }) => {
+export const addJobType = createAsyncThunk(
+    'jobType/add',
+    async (newJobType: Partial<JobTypeMaster>, { rejectWithValue }) => {
         const { data, error } = await supabase
-            .from('CustomerMaster')
-            .insert([newCustomer])
+            .from('JobTypeMaster')
+            .insert([newJobType])
             .select()
 
         if (error) return rejectWithValue(error.message)
-        return data[0] as CustomerMaster
+        return data[0] as JobTypeMaster
     }
 )
 
-// Update customer
-export const updateCustomer = createAsyncThunk(
-    'customer/update',
-    async ({ id, updates }: { id: number; updates: Partial<CustomerMaster> }, { rejectWithValue }) => {
+export const updateJobType = createAsyncThunk(
+    'jobType/update',
+    async ({ id, updates }: { id: number; updates: Partial<JobTypeMaster> }, { rejectWithValue }) => {
         const { data, error } = await supabase
-            .from('CustomerMaster')
+            .from('JobTypeMaster')
             .update(updates)
             .eq('ID', id)
             .select()
 
         if (error) return rejectWithValue(error.message)
-        return data[0] as CustomerMaster
+        return data[0] as JobTypeMaster
     }
 )
 
-// Soft delete customer (set ActiveStatus to false)
-export const deleteCustomer = createAsyncThunk(
-    'customer/delete',
+export const deleteJobType = createAsyncThunk(
+    'jobType/delete',
     async (id: number, { rejectWithValue }) => {
         const { error } = await supabase
-            .from('CustomerMaster')
+            .from('JobTypeMaster')
             .update({ ActiveStatus: false })
             .eq('ID', id)
 
@@ -74,41 +70,37 @@ export const deleteCustomer = createAsyncThunk(
     }
 )
 
-const customerSlice = createSlice({
-    name: 'customer',
+const jobTypeSlice = createSlice({
+    name: 'jobType',
     initialState,
     reducers: {},
     extraReducers: (builder) => {
         builder
-            // Fetch
-            .addCase(fetchCustomers.pending, (state) => {
+            .addCase(fetchJobTypes.pending, (state) => {
                 state.loading = true
                 state.error = null
             })
-            .addCase(fetchCustomers.fulfilled, (state, action) => {
+            .addCase(fetchJobTypes.fulfilled, (state, action) => {
                 state.loading = false
                 state.data = action.payload
             })
-            .addCase(fetchCustomers.rejected, (state, action) => {
+            .addCase(fetchJobTypes.rejected, (state, action) => {
                 state.loading = false
                 state.error = action.payload as string
             })
-            // Add
-            .addCase(addCustomer.fulfilled, (state, action) => {
+            .addCase(addJobType.fulfilled, (state, action) => {
                 state.data.unshift(action.payload)
             })
-            // Update
-            .addCase(updateCustomer.fulfilled, (state, action) => {
+            .addCase(updateJobType.fulfilled, (state, action) => {
                 const index = state.data.findIndex(c => c.ID === action.payload.ID)
                 if (index !== -1) {
                     state.data[index] = action.payload
                 }
             })
-            // Delete
-            .addCase(deleteCustomer.fulfilled, (state, action) => {
+            .addCase(deleteJobType.fulfilled, (state, action) => {
                 state.data = state.data.filter(c => c.ID !== action.payload)
             })
     }
 })
 
-export default customerSlice.reducer
+export default jobTypeSlice.reducer
