@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { Session, User } from '@supabase/supabase-js'
-import {createClient} from  '../lib/client'
+import { createClient, setRememberMe, clearRememberMe } from '../lib/client'
 
 type AuthState = {
   user: User | null
@@ -33,9 +33,18 @@ export const signUp = createAsyncThunk(
 
 export const signIn = createAsyncThunk(
   'auth/signIn',
-  async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
+  async (
+    { email, password, rememberMe = false }: { email: string; password: string; rememberMe?: boolean },
+    { rejectWithValue }
+  ) => {
+    // Set storage preference BEFORE sign-in so the session is stored correctly
+    setRememberMe(rememberMe)
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) return rejectWithValue(error.message)
+    if (error) {
+      // Revert remember-me flag on failure
+      clearRememberMe()
+      return rejectWithValue(error.message)
+    }
     return data
   }
 )
@@ -43,6 +52,8 @@ export const signIn = createAsyncThunk(
 export const signOut = createAsyncThunk('auth/signOut', async (_, { rejectWithValue }) => {
   const { error } = await supabase.auth.signOut()
   if (error) return rejectWithValue(error.message)
+  // Clear remember-me preference on explicit sign-out
+  clearRememberMe()
   return true
 })
 

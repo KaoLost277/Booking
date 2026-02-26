@@ -1,52 +1,88 @@
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store";
+import type { Booking as BookingType } from "../types/booking";
+import type { FilterValues } from "./BookingFilter";
 import CustomButton from "./CustomButton";
 import LoadingSpinner from "./LoadingSpinner";
 
-type Booking = {
+type BookingRow = {
   id: number;
   customer: string;
+  customerID: number | null;
   place: string;
+  locationID: number | null;
+  jobType: string;
+  jobTypeID: number | null;
   start: string;
   end: string;
   date: string;
   Status: "Booking" | "Inprogress" | "Canceled" | "Completed";
 };
 
-const statusStyle: Record<Booking["Status"], string> = {
+interface BookingTableProps {
+  onEdit?: (booking: BookingType) => void;
+  onDelete?: (booking: BookingType) => void;
+  filters?: FilterValues | null;
+}
+
+const statusStyle: Record<BookingRow["Status"], string> = {
   Booking: "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
   Inprogress: "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
   Canceled: "bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20",
   Completed: "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
 };
 
-const statusLabel: Record<Booking["Status"], string> = {
+const statusLabel: Record<BookingRow["Status"], string> = {
   Booking: "จองแล้ว",
   Inprogress: "กำลังดำเนินการ",
   Canceled: "ยกเลิก",
   Completed: "เสร็จสิ้น",
 };
 
-type SortKey = keyof Booking;
+type SortKey = keyof BookingRow;
 type Direction = "asc" | "desc";
 
-function BookingTable() {
+function BookingTable({ onEdit, onDelete, filters }: BookingTableProps) {
   const bookState = useSelector((state: RootState) => state.book);
-  const bookings: Booking[] = (bookState.data || []).map((item: any) => ({
+  const rawBookings = bookState.data || [];
+
+  const bookings: BookingRow[] = rawBookings.map((item: any) => ({
     id: item.ID,
-    customer: item.CustomerMaster.CustomerName ?? '-',
-    place: item.LocationMaster.LocationName ?? '-',
+    customer: item.CustomerMaster?.CustomerName ?? '-',
+    customerID: item.CustomerID ?? null,
+    place: item.LocationMaster?.LocationName ?? '-',
+    locationID: item.LocationID ?? null,
+    jobType: item.JobTypeMaster?.TypeName ?? '-',
+    jobTypeID: item.JobType ?? null,
     start: item.StartTime ?? '-',
     end: item.EndTime ?? '-',
     date: item.Date ?? '-',
-    Status: (item.Status as Booking["Status"]) || 'Booking',
+    Status: (item.Status as BookingRow["Status"]) || 'Booking',
   }));
 
   const [sortKey, setSortKey] = useState<SortKey>("date");
   const [direction, setDirection] = useState<Direction>("asc");
 
-  const filtered = bookings;
+  // กรองข้อมูลตาม filter values
+  const filtered = useMemo(() => {
+    if (!filters) return bookings;
+
+    return bookings.filter((b) => {
+      // กรองวันที่
+      if (filters.date && b.date !== filters.date) return false;
+      // กรองลูกค้า
+      if (filters.customerID && b.customerID !== Number(filters.customerID)) return false;
+      // กรองสถานที่
+      if (filters.locationID && b.locationID !== Number(filters.locationID)) return false;
+      // กรองประเภทงาน
+      if (filters.jobTypeID && b.jobTypeID !== Number(filters.jobTypeID)) return false;
+      // กรองสถานะ
+      if (filters.status && b.Status !== String(filters.status)) return false;
+
+      return true;
+    });
+  }, [bookings, filters]);
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("th-TH-u-ca-gregory", {
@@ -66,14 +102,14 @@ function BookingTable() {
       }
 
       if (sortKey === "Status") {
-        const order: Record<Booking["Status"], number> = {
+        const order: Record<BookingRow["Status"], number> = {
           Booking: 4,
           Inprogress: 3,
           Completed: 2,
           Canceled: 1,
         };
-        valA = order[valA as Booking["Status"]];
-        valB = order[valB as Booking["Status"]];
+        valA = order[valA as BookingRow["Status"]];
+        valB = order[valB as BookingRow["Status"]];
       }
 
       if (valA > valB) return direction === "asc" ? 1 : -1;
@@ -91,6 +127,21 @@ function BookingTable() {
       setSortKey(key);
       setDirection("asc");
     }
+  };
+
+  // หาข้อมูล Booking ดิบจาก rawBookings โดยใช้ ID
+  const findRawBooking = (id: number): BookingType | undefined => {
+    return rawBookings.find((item) => item.ID === id);
+  };
+
+  const handleEdit = (id: number) => {
+    const booking = findRawBooking(id);
+    if (booking && onEdit) onEdit(booking);
+  };
+
+  const handleDelete = (id: number) => {
+    const booking = findRawBooking(id);
+    if (booking && onDelete) onDelete(booking);
   };
 
   const Arrow = ({ column }: { column: SortKey }) => (
@@ -123,6 +174,16 @@ function BookingTable() {
 
   return (
     <div className="w-full space-y-4">
+      {/* Filter result count */}
+      {filters && (
+        <p className="text-sm text-[#6e6e80] dark:text-[#8e8ea0]">
+          พบ <span className="font-semibold text-[#0d0d0d] dark:text-[#ececf1]">{sorted.length}</span> รายการ
+          {sorted.length !== bookings.length && (
+            <span> จากทั้งหมด {bookings.length} รายการ</span>
+          )}
+        </p>
+      )}
+
       {/* Desktop Table */}
       <div className="hidden md:block overflow-x-auto rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] transition-colors">
         <table className="w-full text-sm">
@@ -131,6 +192,7 @@ function BookingTable() {
               <Th label="วันที่" column="date" />
               <Th label="ลูกค้า" column="customer" />
               <Th label="สถานที่" column="place" />
+              <Th label="ประเภทงาน" column="jobType" />
               <Th label="เวลาเริ่ม" column="start" />
               <Th label="สิ้นสุดเวลา" column="end" />
               <Th label="สถานะ" column="Status" />
@@ -141,7 +203,13 @@ function BookingTable() {
           </thead>
 
           <tbody className="divide-y divide-[#e5e5e5] dark:divide-[#2a2a2a] bg-white dark:bg-[#0d0d0d]">
-            {sorted.map((b) => (
+            {sorted.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="p-8 text-center text-[#6e6e80] dark:text-[#8e8ea0]">
+                  ไม่พบข้อมูลการจอง
+                </td>
+              </tr>
+            ) : sorted.map((b) => (
               <tr
                 key={b.id}
                 className="hover:bg-[#f7f7f8] dark:hover:bg-[#1a1a1a] transition-colors"
@@ -154,6 +222,9 @@ function BookingTable() {
                 </td>
                 <td className="p-4 text-[#6e6e80] dark:text-[#8e8ea0]">
                   {b.place}
+                </td>
+                <td className="p-4 text-[#6e6e80] dark:text-[#8e8ea0]">
+                  {b.jobType}
                 </td>
                 <td className="p-4 text-[#6e6e80] dark:text-[#8e8ea0] font-mono text-xs">
                   {b.start}
@@ -168,11 +239,19 @@ function BookingTable() {
                 </td>
                 <td className="p-4">
                   <div className="flex justify-center gap-2">
-                    <CustomButton variant="secondary" className="!px-3 !py-1 text-xs">
-                      Edit
+                    <CustomButton
+                      variant="secondary"
+                      className="!px-5 !py-2 text-sm"
+                      onClick={() => handleEdit(b.id)}
+                    >
+                      แก้ไข
                     </CustomButton>
-                    <CustomButton variant="danger" className="!px-3 !py-1 text-xs">
-                      Del
+                    <CustomButton
+                      variant="danger"
+                      className="!px-5 !py-2 text-sm"
+                      onClick={() => handleDelete(b.id)}
+                    >
+                      ลบ
                     </CustomButton>
                   </div>
                 </td>
@@ -184,7 +263,11 @@ function BookingTable() {
 
       {/* Mobile Cards */}
       <div className="md:hidden space-y-3">
-        {sorted.map((b) => (
+        {sorted.length === 0 ? (
+          <div className="text-center py-8 text-[#6e6e80] dark:text-[#8e8ea0]">
+            ไม่พบข้อมูลการจอง
+          </div>
+        ) : sorted.map((b) => (
           <div
             key={b.id}
             className="rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] p-4 bg-white dark:bg-[#1a1a1a] transition-colors"
@@ -203,16 +286,27 @@ function BookingTable() {
               <p>
                 วันที่: <span className="font-medium text-[#0d0d0d] dark:text-[#ececf1]">{formatDate(b.date)}</span>
               </p>
+              <p>ประเภทงาน: <span className="font-medium text-[#0d0d0d] dark:text-[#ececf1]">{b.jobType}</span></p>
               <p>เริ่ม: <span className="font-mono text-xs">{b.start}</span></p>
               <p>สิ้นสุด: <span className="font-mono text-xs">{b.end}</span></p>
             </div>
 
             <div className="flex gap-2 pt-3 border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
-              <CustomButton variant="secondary" fullWidth className="!py-2">
-                Edit
+              <CustomButton
+                variant="secondary"
+                fullWidth
+                className="!py-2"
+                onClick={() => handleEdit(b.id)}
+              >
+                แก้ไข
               </CustomButton>
-              <CustomButton variant="danger" fullWidth className="!py-2">
-                Del
+              <CustomButton
+                variant="danger"
+                fullWidth
+                className="!py-2"
+                onClick={() => handleDelete(b.id)}
+              >
+                ลบ
               </CustomButton>
             </div>
           </div>

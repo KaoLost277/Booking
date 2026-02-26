@@ -13,6 +13,7 @@ export default function Login() {
     const { status, error } = useSelector((state: RootState) => state.auth);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [rememberMe, setRememberMe] = useState(false);
 
     const loading = status === "loading";
 
@@ -22,7 +23,7 @@ export default function Login() {
         if (!email) return;
         if (!password) return;
 
-        const result = await dispatch(signIn({ email, password }));
+        const result = await dispatch(signIn({ email, password, rememberMe }));
 
         if (signIn.fulfilled.match(result)) {
             setEmail("");
@@ -66,6 +67,23 @@ export default function Login() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
+
+                            {/* Remember Me checkbox */}
+                            <div className="flex items-center gap-2">
+                                <input
+                                    id="remember-me"
+                                    type="checkbox"
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                    className="h-4 w-4 rounded border-slate-300 text-[#6B2FF9] focus:ring-[#6B2FF9] cursor-pointer accent-[#6B2FF9]"
+                                />
+                                <label
+                                    htmlFor="remember-me"
+                                    className="select-none text-sm text-slate-600 cursor-pointer"
+                                >
+                                    Remember me
+                                </label>
+                            </div>
 
                             {error && (
                                 <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2">

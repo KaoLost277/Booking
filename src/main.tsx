@@ -13,6 +13,7 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import { createClient } from "./lib/client"
 import { setSession } from "./features/authSlice"
 import Test from "./Pages/test"
+import CustomerMaster from "./Pages/CustomerMaster"
 import { ThemeProvider } from "./contexts/ThemeContext"
 
 // initialize supabase client and sync session to redux store
@@ -31,6 +32,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <BookingLayout />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: PATH.CUSTOMER,
+    element: (
+      <ProtectedRoute>
+        <CustomerMaster />
       </ProtectedRoute>
     ),
   },

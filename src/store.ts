@@ -2,13 +2,17 @@ import { configureStore } from '@reduxjs/toolkit'
 import counterReducer from './features/counterSlice'
 import authReducer from './features/authSlice'
 import bookReducer from './features/bookSlice'
+import masterDataReducer from './features/masterDataSlice'
+import customerReducer from './features/customerSlice'
 
 
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
     auth: authReducer,
-    book: bookReducer
+    book: bookReducer,
+    masterData: masterDataReducer,
+    customer: customerReducer
     // <-- ใส่ api reducer
   } // <-- ใส่ api middleware
 })
