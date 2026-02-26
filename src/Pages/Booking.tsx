@@ -17,7 +17,6 @@ type AppLayoutProps = {
 };
 
 function BookingLayout({ }: AppLayoutProps) {
-  const [showFab, setShowFab] = useState(false);
   const heroButtonRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
@@ -27,7 +26,7 @@ function BookingLayout({ }: AppLayoutProps) {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => setShowFab(!entry.isIntersecting),
+      () => { }, // Placeholder callback
       { threshold: 0 }
     );
     if (heroButtonRef.current) observer.observe(heroButtonRef.current);
