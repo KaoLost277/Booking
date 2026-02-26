@@ -223,7 +223,7 @@ const JobTypeMasterPage: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-2 pt-3 border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
+                                    <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
                                         <CustomButton
                                             variant="secondary"
                                             fullWidth

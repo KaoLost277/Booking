@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Plus, Search, Edit2, Trash2, User, Facebook, Users, ExternalLink, Copy, Check, FileText } from 'lucide-react'
+import { Plus, Search, User, Users, ExternalLink, Copy, Check, FileText } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../hooks'
 import { fetchCustomers, deleteCustomer } from '../features/customerSlice'
 import CustomerModal from '../components/CustomerModal'
@@ -248,12 +248,12 @@ const CustomerMasterPage: React.FC = () => {
 
                                     <div className="text-sm mb-4 space-y-3">
                                         {customer.FacebookIink ? (
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex flex-col sm:flex-row gap-2">
                                                 <a
                                                     href={customer.FacebookIink.startsWith('http') ? customer.FacebookIink : `https://${customer.FacebookIink}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex-1 flex items-center justify-center gap-2 text-blue-600 dark:text-blue-400 font-medium transition-colors border border-blue-200 dark:border-blue-500/20 rounded-lg p-2.5 bg-blue-50 dark:bg-blue-500/10 text-xs"
+                                                    className="w-full flex items-center justify-center gap-2 text-blue-600 dark:text-blue-400 font-medium transition-colors border border-blue-200 dark:border-blue-500/20 rounded-lg p-2.5 bg-blue-50 dark:bg-blue-500/10 text-xs"
                                                 >
                                                     <ExternalLink className="w-4 h-4" />
                                                     เปิดลิงก์
@@ -266,7 +266,7 @@ const CustomerMasterPage: React.FC = () => {
                                                         setCopiedId(customer.ID)
                                                         setTimeout(() => setCopiedId(null), 2000)
                                                     }}
-                                                    className="flex-1 flex items-center justify-center gap-2 text-[#0d0d0d] dark:text-[#ececf1] font-medium transition-colors border border-[#e5e5e5] dark:border-[#2a2a2a] rounded-lg p-2.5 bg-white dark:bg-[#1a1a1a] text-xs hover:bg-[#f7f7f8] dark:hover:bg-[#2a2a2a]"
+                                                    className="w-full flex items-center justify-center gap-2 text-[#0d0d0d] dark:text-[#ececf1] font-medium transition-colors border border-[#e5e5e5] dark:border-[#2a2a2a] rounded-lg p-2.5 bg-white dark:bg-[#1a1a1a] text-xs hover:bg-[#f7f7f8] dark:hover:bg-[#2a2a2a]"
                                                 >
                                                     {copiedId === customer.ID ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-[#6e6e80] dark:text-[#8e8ea0]" />}
                                                     คัดลอกลิงก์
@@ -291,7 +291,7 @@ const CustomerMasterPage: React.FC = () => {
                                         </button>
                                     </div>
 
-                                    <div className="flex gap-2 pt-3 border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
+                                    <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
                                         <CustomButton
                                             variant="secondary"
                                             fullWidth
