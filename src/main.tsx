@@ -3,7 +3,7 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom"
 import "./index.css"
 import { PATH } from "../src/constants"
 
-import Hello from "./components/Hello"
+
 import Login from "./Pages/Login"
 import BookingLayout from "./Pages/Booking"
 import SignUp from "./Pages/SignUp"
@@ -12,7 +12,7 @@ import { Provider } from "react-redux"
 import ProtectedRoute from "./components/ProtectedRoute"
 import { createClient } from "./lib/client"
 import { setSession } from "./features/authSlice"
-import Test from "./Pages/test"
+
 import CustomerMaster from "./Pages/CustomerMaster"
 import LocationMaster from "./Pages/LocationMaster"
 import JobTypeMaster from "./Pages/JobTypeMaster"
@@ -80,15 +80,7 @@ const router = createBrowserRouter([
     element: <SignUp />,
 
   },
-  {
-    path: "/hello/:id",
-    element: <Hello />,
-  },
-  {
-    path: "/Test",
-    element: <Test />,
 
-  }
 ])
 
 createRoot(document.getElementById("root")!).render(

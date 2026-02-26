@@ -330,8 +330,8 @@ const DashboardPage: React.FC = () => {
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#2a2a2a' : '#e5e5e5'} />
                                 <XAxis dataKey="label" tick={{ fontSize: 11, fill: isDark ? '#8e8ea0' : '#6e6e80' }} axisLine={false} tickLine={false} />
-                                <YAxis tick={{ fontSize: 11, fill: isDark ? '#8e8ea0' : '#6e6e80' }} axisLine={false} tickLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
-                                <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name: string) => [value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' บาท', name === 'revenue' ? 'รายได้' : 'ภาษี']} />
+                                <YAxis tick={{ fontSize: 11, fill: isDark ? '#8e8ea0' : '#6e6e80' }} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)} />
+                                <Tooltip contentStyle={tooltipStyle} formatter={(value, name) => [Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' บาท', name === 'revenue' ? 'รายได้' : 'ภาษี']} />
                                 <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} fill="url(#gradRevenue)" name="revenue" />
                                 <Area type="monotone" dataKey="tax" stroke="#f59e0b" strokeWidth={2} fill="url(#gradTax)" name="tax" />
                             </AreaChart>
@@ -363,7 +363,7 @@ const DashboardPage: React.FC = () => {
                                             <Cell key={entry.name} fill={STATUS_COLORS[entry.name] || '#6e6e80'} />
                                         ))}
                                     </Pie>
-                                    <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name: string) => [value + ' รายการ', name]} />
+                                    <Tooltip contentStyle={tooltipStyle} formatter={(value, name) => [value + ' รายการ', String(name)]} />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
@@ -395,7 +395,7 @@ const DashboardPage: React.FC = () => {
                                     <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#2a2a2a' : '#e5e5e5'} />
                                     <XAxis dataKey="label" tick={{ fontSize: 11, fill: isDark ? '#8e8ea0' : '#6e6e80' }} axisLine={false} tickLine={false} />
                                     <YAxis tick={{ fontSize: 11, fill: isDark ? '#8e8ea0' : '#6e6e80' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                                    <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [value + ' รายการ', 'จำนวน']} />
+                                    <Tooltip contentStyle={tooltipStyle} formatter={(value) => [value + ' รายการ', 'จำนวน']} />
                                     <Bar dataKey="count" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={32} />
                                 </BarChart>
                             </ResponsiveContainer>
