@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import Navbars from '../components/Navbars.tsx'
 import BookingTable from '../components/BookingTable.tsx'
 import BookingFilter from '../components/BookingFilter.tsx'
+import type { FilterValues } from '../components/BookingFilter';
 import CustomButton from '../components/CustomButton.tsx'
-import { Plus, CalendarDays, Database } from 'lucide-react'
-import Test from "./test"
+import { Plus, CalendarDays } from 'lucide-react'
 import BookingModal from '../components/BookingModal';
 import { useAppDispatch } from "../hooks";
 import { fetchMasterData } from "../features/masterDataSlice";
@@ -23,6 +23,7 @@ function BookingLayout({ }: AppLayoutProps) {
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Booking | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [filterValues, setFilterValues] = useState<FilterValues | null>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -34,6 +35,11 @@ function BookingLayout({ }: AppLayoutProps) {
   }, []);
 
   const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(bookGet());
+    dispatch(fetchMasterData());
+  }, [dispatch]);
 
   // เปิด Modal โหมดเพิ่มใหม่
   const handleNewBooking = () => {
@@ -74,15 +80,6 @@ function BookingLayout({ }: AppLayoutProps) {
     }
   };
 
-  const handleTestMaster = async () => {
-    try {
-      const result = await dispatch(fetchMasterData()).unwrap();
-      console.log("Master Data Result:", result);
-    } catch (error) {
-      console.error("Master Data Error:", error);
-    }
-  };
-
   return (
     <div className="min-h-dvh bg-white dark:bg-[#0d0d0d] transition-colors duration-200">
       <Navbars />
@@ -108,14 +105,6 @@ function BookingLayout({ }: AppLayoutProps) {
 
             {/* Actions */}
             <div ref={heroButtonRef} className="flex items-center gap-3">
-              <CustomButton
-                onClick={handleTestMaster}
-                variant="secondary"
-              >
-                <Database className="w-5 h-5" />
-                Test Master Data
-              </CustomButton>
-              <Test />
               <CustomButton onClick={handleNewBooking}>
                 <Plus className="w-5 h-5" />
                 เพิ่มการจองใหม่
@@ -129,13 +118,17 @@ function BookingLayout({ }: AppLayoutProps) {
       <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         {/* Filter */}
         <div className="mb-6">
-          <BookingFilter />
+          <BookingFilter
+            onFilter={(f) => setFilterValues(f)}
+            onClear={() => setFilterValues(null)}
+          />
         </div>
 
         {/* Table */}
         <BookingTable
           onEdit={handleEditBooking}
           onDelete={handleDeleteBooking}
+          filters={filterValues}
         />
       </main>
 

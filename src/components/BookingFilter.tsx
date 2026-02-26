@@ -1,18 +1,31 @@
 import { useState } from 'react';
-import { Search, Calendar, User, MapPin, ChevronDown, Check, Plus } from 'lucide-react';
+import { Search, Calendar, User, MapPin, ChevronDown, Check, Briefcase } from 'lucide-react';
 import CustomButton from './CustomButton';
 import SearchableSelect from './SearchableSelect';
 import { useAppSelector } from '../hooks';
 
-const BookingFilter: React.FC = () => {
+export interface FilterValues {
+    date: string;
+    customerID: string | number;
+    locationID: string | number;
+    jobTypeID: string | number;
+    status: string | number;
+}
+
+interface BookingFilterProps {
+    onFilter?: (filters: FilterValues) => void;
+    onClear?: () => void;
+}
+
+const BookingFilter: React.FC<BookingFilterProps> = ({ onFilter, onClear }) => {
     const [date, setDate] = useState('');
     const [customer, setCustomer] = useState<string | number>('');
     const [location, setLocation] = useState<string | number>('');
+    const [jobType, setJobType] = useState<string | number>('');
     const [status, setStatus] = useState<string | number>('');
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
 
-
-    const { customers, locations, statusOptions } = useAppSelector((state) => state.masterData);
+    const { customers, locations, jobTypes, statusOptions } = useAppSelector((state) => state.masterData);
 
     const customerOptions = customers.map((c) => ({
         id: c.ID,
@@ -24,8 +37,28 @@ const BookingFilter: React.FC = () => {
         label: l.LocationName
     }));
 
+    const jobTypeOptions = jobTypes.map((j) => ({
+        id: j.ID,
+        label: j.TypeName
+    }));
+
     const handleSearch = () => {
-        console.log('Searching for:', { date, customer, location, status });
+        onFilter?.({
+            date,
+            customerID: customer,
+            locationID: location,
+            jobTypeID: jobType,
+            status,
+        });
+    };
+
+    const handleClear = () => {
+        setDate('');
+        setCustomer('');
+        setLocation('');
+        setJobType('');
+        setStatus('');
+        onClear?.();
     };
 
     return (
@@ -48,7 +81,7 @@ const BookingFilter: React.FC = () => {
 
             {/* Filter Body */}
             <div className={`${isExpanded ? 'block' : 'hidden'} lg:block p-5 pt-0 lg:pt-5`}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 items-end gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 items-end gap-4">
                     {/* Date Filter */}
                     <div className="w-full">
                         <label className="block text-xs font-medium text-[#6e6e80] dark:text-[#8e8ea0] uppercase tracking-wider mb-1.5 ml-0.5">
@@ -86,6 +119,15 @@ const BookingFilter: React.FC = () => {
                     />
 
                     <SearchableSelect
+                        label="ประเภทงาน"
+                        icon={<Briefcase className="w-5 h-5" />}
+                        options={jobTypeOptions}
+                        value={jobType}
+                        onChange={setJobType}
+                        placeholder="เลือกประเภทงาน..."
+                    />
+
+                    <SearchableSelect
                         label="สถานะ"
                         icon={<Check className="w-5 h-5" />}
                         options={statusOptions}
@@ -98,17 +140,11 @@ const BookingFilter: React.FC = () => {
                 {/* Action Buttons */}
                 <div className="mt-5 flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[#e5e5e5] dark:border-[#2a2a2a]">
 
-
                     <div className="flex flex-wrap items-center justify-end gap-3 flex-1">
                         <CustomButton
                             variant="secondary"
                             className="w-full sm:w-max min-w-[120px]"
-                            onClick={() => {
-                                setDate('');
-                                setCustomer('');
-                                setLocation('');
-                                setStatus('');
-                            }}
+                            onClick={handleClear}
                         >
                             ล้างค่า
                         </CustomButton>

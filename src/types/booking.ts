@@ -3,12 +3,14 @@ export interface CustomerMaster {
     ID: number;
     CustomerName: string;
     FacebookIink: string;
+    ActiveStatus?: boolean | null;
 }
 
 export interface LocationMaster {
     ID: number;
     LocationName: string;
     Locationlink: string;
+    ActiveStatus?: boolean | null;
 }
 
 export interface JobTypeMaster {
@@ -16,6 +18,7 @@ export interface JobTypeMaster {
     TypeName: string;
     MinTimeMinutes: number;
     PriceUnitMinutes: number;
+    ActiveStatus?: boolean | null;
 }
 
 export interface Booking {

@@ -3,6 +3,7 @@ import counterReducer from './features/counterSlice'
 import authReducer from './features/authSlice'
 import bookReducer from './features/bookSlice'
 import masterDataReducer from './features/masterDataSlice'
+import customerReducer from './features/customerSlice'
 
 
 export const store = configureStore({
@@ -10,7 +11,8 @@ export const store = configureStore({
     counter: counterReducer,
     auth: authReducer,
     book: bookReducer,
-    masterData: masterDataReducer
+    masterData: masterDataReducer,
+    customer: customerReducer
     // <-- ใส่ api reducer
   } // <-- ใส่ api middleware
 })

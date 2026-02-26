@@ -5,19 +5,20 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   lightOnly?: boolean;
+  icon?: React.ReactNode;
 }
 
 const InputComponent = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, className = '', id, lightOnly = false, ...props }, ref) => {
+  ({ label, error, className = '', id, lightOnly = false, icon, ...props }, ref) => {
 
     // สไตล์ให้ตรงกับ combobox ใน BookingFilter (OpenAI theme)
     const isReadOnlyOrDisabled = props.readOnly || props.disabled;
     const baseClasses = `block w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all ${isReadOnlyOrDisabled
-        ? "bg-[#f7f7f8] dark:bg-[#2a2a2a] text-[#6e6e80] dark:text-[#8e8ea0] cursor-not-allowed"
-        : lightOnly
-          ? "bg-white text-[#0d0d0d] placeholder:text-[#acacbe]"
-          : "bg-white dark:bg-[#1a1a1a] text-[#0d0d0d] dark:text-[#ececf1] placeholder:text-[#acacbe] dark:placeholder:text-[#6e6e80]"
-      }`;
+      ? "bg-[#f7f7f8] dark:bg-[#2a2a2a] text-[#6e6e80] dark:text-[#8e8ea0] cursor-not-allowed"
+      : lightOnly
+        ? "bg-white text-[#0d0d0d] placeholder:text-[#acacbe]"
+        : "bg-white dark:bg-[#1a1a1a] text-[#0d0d0d] dark:text-[#ececf1] placeholder:text-[#acacbe] dark:placeholder:text-[#6e6e80]"
+      } ${icon ? 'pl-10' : ''}`;
 
     const statusClasses = error
       ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500/10"
@@ -35,12 +36,19 @@ const InputComponent = forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
 
-        <input
-          ref={ref}
-          id={id}
-          className={`${baseClasses} ${statusClasses} ${className}`}
-          {...props}
-        />
+        <div className="relative group">
+          {icon && (
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10 text-[#acacbe] dark:text-[#6e6e80] group-focus-within:text-[#0d0d0d] dark:group-focus-within:text-[#ececf1] transition-colors">
+              {icon}
+            </div>
+          )}
+          <input
+            ref={ref}
+            id={id}
+            className={`${baseClasses} ${statusClasses} ${className}`}
+            {...props}
+          />
+        </div>
 
         {error && (
           <p className="text-xs text-red-500 font-medium">{error}</p>
