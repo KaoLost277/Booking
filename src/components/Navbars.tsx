@@ -21,11 +21,11 @@ type NavbarsProps = {
 };
 
 const defaultItems: NavItem[] = [
-  { label: "Booking", to: PATH.HOME, end: true },
+  { label: "Dashboard", to: PATH.DASHBOARD, end: true },
+  { label: "Booking", to: PATH.BOOKING },
   { label: "Customer", to: PATH.CUSTOMER },
   { label: "Location", to: PATH.LOCATION },
   { label: "Job Type", to: PATH.JOB_TYPE },
-  { label: "Dashboard", to: PATH.DASHBOARD },
 ];
 
 export default function Navbars({

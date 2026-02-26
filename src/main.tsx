@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client"
-import { RouterProvider, createBrowserRouter } from "react-router-dom"
+import { RouterProvider, createBrowserRouter, Navigate } from "react-router-dom"
 import "./index.css"
 import { PATH } from "../src/constants"
 
@@ -32,6 +32,18 @@ supabase.auth.onAuthStateChange((_event, session) => {
 const router = createBrowserRouter([
   {
     path: "/",
+    element: <Navigate to={PATH.HOME} replace />,
+  },
+  {
+    path: PATH.DASHBOARD,
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: PATH.BOOKING,
     element: (
       <ProtectedRoute>
         <BookingLayout />
@@ -59,14 +71,6 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <JobTypeMaster />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: PATH.DASHBOARD,
-    element: (
-      <ProtectedRoute>
-        <Dashboard />
       </ProtectedRoute>
     ),
   },
