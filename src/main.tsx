@@ -11,7 +11,7 @@ import { store } from "./store"
 import { Provider } from "react-redux"
 import ProtectedRoute from "./components/ProtectedRoute"
 import { createClient } from "./lib/client"
-import { setSession } from "./features/authSlice"
+import { setSession, setInitialized } from "./features/authSlice"
 
 import CustomerMaster from "./Pages/CustomerMaster"
 import LocationMaster from "./Pages/LocationMaster"
@@ -23,6 +23,7 @@ import { ThemeProvider } from "./contexts/ThemeContext"
 const supabase = createClient()
 supabase.auth.getSession().then(({ data }) => {
   store.dispatch(setSession(data.session))
+  store.dispatch(setInitialized(true))
 })
 supabase.auth.onAuthStateChange((_event, session) => {
   store.dispatch(setSession(session))
