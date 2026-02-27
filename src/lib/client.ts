@@ -1,20 +1,58 @@
 import { createBrowserClient } from '@supabase/ssr'
 
-const REMEMBER_ME_KEY = 'app_remember_me'
+const REMEMBER_ME_KEY = 'app_remember_me_data'
+
+interface RememberMeData {
+  enabled: boolean
+  expiresAt: number | null
+}
 
 /**
  * Set the "Remember Me" preference.
- * When true  → Supabase stores session in localStorage  (persists across browser restarts)
- * When false → Supabase stores session in sessionStorage (cleared when browser closes)
+ * When true  → Supabase stores session in localStorage + expires at 90 days
+ * When false → Supabase stores session in sessionStorage
  */
 export function setRememberMe(value: boolean) {
-  // We always write this flag to localStorage so we can read it on next visit
-  localStorage.setItem(REMEMBER_ME_KEY, JSON.stringify(value))
+  let expiresAt = null
+  if (value) {
+    expiresAt = Date.now() + 90 * 24 * 60 * 60 * 1000 // 90 days from now
+  }
+
+  const data: RememberMeData = { enabled: value, expiresAt }
+  localStorage.setItem(REMEMBER_ME_KEY, JSON.stringify(data))
 }
 
 export function getRememberMe(): boolean {
   try {
-    return JSON.parse(localStorage.getItem(REMEMBER_ME_KEY) ?? 'false')
+    // support backward compatibility with old key
+    const oldRawData = localStorage.getItem('app_remember_me')
+    if (oldRawData) {
+      if (oldRawData === 'true') {
+        localStorage.removeItem('app_remember_me')
+        setRememberMe(true)
+        return true
+      }
+      if (oldRawData === 'false') {
+        localStorage.removeItem('app_remember_me')
+        setRememberMe(false)
+        return false
+      }
+    }
+
+    const rawData = localStorage.getItem(REMEMBER_ME_KEY)
+    if (!rawData) return false
+
+    const parsed = JSON.parse(rawData) as RememberMeData
+
+    if (parsed.enabled && parsed.expiresAt) {
+      if (Date.now() > parsed.expiresAt) {
+        // Token has expired
+        clearRememberMe()
+        return false
+      }
+    }
+
+    return true
   } catch {
     return false
   }
@@ -26,6 +64,7 @@ export function getRememberMe(): boolean {
  */
 export function clearRememberMe() {
   localStorage.removeItem(REMEMBER_ME_KEY)
+  localStorage.removeItem('app_remember_me')
 }
 
 /**
@@ -39,7 +78,11 @@ function createDualStorage() {
 
   return {
     getItem: (key: string): string | null => {
-      // Check both storages – the token may exist in either one
+      // If remember me is false or expired, ONLY check sessionStorage
+      // We don't want to accidentally resurrect an expired token from localStorage
+      if (!getRememberMe()) {
+        return sessionStorage.getItem(key)
+      }
       return localStorage.getItem(key) ?? sessionStorage.getItem(key)
     },
     setItem: (key: string, value: string): void => {

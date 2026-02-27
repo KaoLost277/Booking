@@ -47,8 +47,8 @@ export const fetchMasterData = createAsyncThunk(
                 customers: custRes.data as CustomerMaster[],
                 locations: locRes.data as LocationMaster[]
             }
-        } catch (error: any) {
-            return rejectWithValue(error.message)
+        } catch (error: unknown) {
+            return rejectWithValue(error instanceof Error ? error.message : String(error))
         }
     }
 )

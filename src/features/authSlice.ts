@@ -7,6 +7,7 @@ type AuthState = {
   session: Session | null
   status: 'idle' | 'loading' | 'failed'
   error: string | null
+  isInitialized: boolean
 }
 
 const initialState: AuthState = {
@@ -14,6 +15,7 @@ const initialState: AuthState = {
   session: null,
   status: 'idle',
   error: null,
+  isInitialized: false,
 }
 
 const supabase = createClient()
@@ -68,6 +70,9 @@ const authSlice = createSlice({
       state.session = action.payload
       state.user = action.payload?.user ?? null
     },
+    setInitialized(state, action: { payload: boolean }) {
+      state.isInitialized = action.payload
+    },
   },
   extraReducers(builder) {
     builder
@@ -104,5 +109,5 @@ const authSlice = createSlice({
   },
 })
 
-export const { clearError, setSession } = authSlice.actions
+export const { clearError, setSession, setInitialized } = authSlice.actions
 export default authSlice.reducer

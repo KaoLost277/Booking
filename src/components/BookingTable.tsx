@@ -51,7 +51,7 @@ function BookingTable({ onEdit, onDelete, filters }: BookingTableProps) {
   const bookState = useSelector((state: RootState) => state.book);
   const rawBookings = bookState.data || [];
 
-  const bookings: BookingRow[] = rawBookings.map((item: any) => ({
+  const bookings: BookingRow[] = rawBookings.map((item: BookingType) => ({
     id: item.ID,
     customer: item.CustomerMaster?.CustomerName ?? '-',
     customerID: item.CustomerID ?? null,
@@ -105,12 +105,12 @@ function BookingTable({ onEdit, onDelete, filters }: BookingTableProps) {
 
   const sorted = useMemo(() => {
     const sortedData = [...filtered].sort((a, b) => {
-      let valA: any = a[sortKey];
-      let valB: any = b[sortKey];
+      let valA: string | number = (a[sortKey] as string | number) || "";
+      let valB: string | number = (b[sortKey] as string | number) || "";
 
       if (sortKey === "start" || sortKey === "end") {
-        valA = valA.replace(":", "");
-        valB = valB.replace(":", "");
+        valA = String(valA).replace(":", "");
+        valB = String(valB).replace(":", "");
       }
 
       if (sortKey === "Status") {
@@ -156,23 +156,6 @@ function BookingTable({ onEdit, onDelete, filters }: BookingTableProps) {
     if (booking && onDelete) onDelete(booking);
   };
 
-  const Arrow = ({ column }: { column: SortKey }) => (
-    <span className="ml-1 text-xs opacity-50">
-      {sortKey === column ? (direction === "asc" ? "▲" : "▼") : "↕"}
-    </span>
-  );
-
-  const Th = ({ label, column }: { label: string; column: SortKey }) => (
-    <th
-      onClick={() => handleSort(column)}
-      className="p-4 cursor-pointer select-none text-left text-xs font-medium uppercase tracking-wider text-[#6e6e80] dark:text-[#8e8ea0] hover:text-[#0d0d0d] dark:hover:text-[#ececf1] transition-colors"
-    >
-      <div className="flex items-center gap-1">
-        {label} <Arrow column={column} />
-      </div>
-    </th>
-  );
-
   if (bookState.loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -201,12 +184,24 @@ function BookingTable({ onEdit, onDelete, filters }: BookingTableProps) {
         <table className="w-full text-sm">
           <thead className="bg-[#f7f7f8] dark:bg-[#1a1a1a] border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
             <tr>
-              <Th label="วันที่ / เวลา" column="date" />
-              <Th label="ลูกค้า" column="customer" />
-              <Th label="ประเภทงาน" column="jobType" />
-              <Th label="สถานที่" column="place" />
-              <Th label="ยอดสุทธิ" column="summary" />
-              <Th label="สถานะ" column="Status" />
+              <th onClick={() => handleSort("date")} className="p-4 cursor-pointer select-none text-left text-xs font-medium uppercase tracking-wider text-[#6e6e80] dark:text-[#8e8ea0]">
+                วันที่ / เวลา <span className="ml-1 text-xs opacity-50">{sortKey === "date" ? (direction === "asc" ? "▲" : "▼") : "↕"}</span>
+              </th>
+              <th onClick={() => handleSort("customer")} className="p-4 cursor-pointer select-none text-left text-xs font-medium uppercase tracking-wider text-[#6e6e80] dark:text-[#8e8ea0]">
+                ลูกค้า <span className="ml-1 text-xs opacity-50">{sortKey === "customer" ? (direction === "asc" ? "▲" : "▼") : "↕"}</span>
+              </th>
+              <th onClick={() => handleSort("jobType")} className="p-4 cursor-pointer select-none text-left text-xs font-medium uppercase tracking-wider text-[#6e6e80] dark:text-[#8e8ea0]">
+                ประเภทงาน <span className="ml-1 text-xs opacity-50">{sortKey === "jobType" ? (direction === "asc" ? "▲" : "▼") : "↕"}</span>
+              </th>
+              <th onClick={() => handleSort("place")} className="p-4 cursor-pointer select-none text-left text-xs font-medium uppercase tracking-wider text-[#6e6e80] dark:text-[#8e8ea0]">
+                สถานที่ <span className="ml-1 text-xs opacity-50">{sortKey === "place" ? (direction === "asc" ? "▲" : "▼") : "↕"}</span>
+              </th>
+              <th onClick={() => handleSort("summary")} className="p-4 cursor-pointer select-none text-left text-xs font-medium uppercase tracking-wider text-[#6e6e80] dark:text-[#8e8ea0]">
+                ยอดสุทธิ <span className="ml-1 text-xs opacity-50">{sortKey === "summary" ? (direction === "asc" ? "▲" : "▼") : "↕"}</span>
+              </th>
+              <th onClick={() => handleSort("Status")} className="p-4 cursor-pointer select-none text-left text-xs font-medium uppercase tracking-wider text-[#6e6e80] dark:text-[#8e8ea0]">
+                สถานะ <span className="ml-1 text-xs opacity-50">{sortKey === "Status" ? (direction === "asc" ? "▲" : "▼") : "↕"}</span>
+              </th>
               <th className="p-4 text-center text-xs font-medium uppercase tracking-wider text-[#6e6e80] dark:text-[#8e8ea0]">
                 จัดการ
               </th>
