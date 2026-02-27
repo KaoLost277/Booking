@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navbars from '../components/Navbars.tsx'
 import BookingTable from '../components/BookingTable.tsx'
 import BookingFilter from '../components/BookingFilter.tsx'
@@ -11,12 +11,8 @@ import { fetchMasterData } from "../features/masterDataSlice";
 import { DeleteBook, bookGet } from "../features/bookSlice";
 import type { Booking } from "../types/booking";
 
-type AppLayoutProps = {
-  title?: string;
-  children?: React.ReactNode;
-};
 
-function BookingLayout({ }: AppLayoutProps) {
+function BookingLayout() {
   const heroButtonRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);

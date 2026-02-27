@@ -20,8 +20,6 @@ const safeMathEval = (expr: string): number | null => {
         const sanitized = expr.replace(/,/g, '').replace(/[^0-9+\-*/(). ]/g, '').trim()
         if (!sanitized) return null
 
-        // ใช้ Function constructor แทน eval เพื่อจำกัดขอบเขต (ไม่สามารถเข้าถึงตัวแปรภายนอกได้)
-        // eslint-disable-next-line no-new-func
         const fn = new Function(`"use strict"; return (${sanitized})`)
         const result = fn()
 

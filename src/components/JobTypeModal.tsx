@@ -173,11 +173,11 @@ const JobTypeModal: React.FC<JobTypeModalProps> = ({ isOpen, onClose, editingJob
                                     return (!isNaN(num) && num >= 0) || "ต้องไม่เป็นค่าติดลบและเป็นตัวเลขที่ถูกต้อง";
                                 },
                                 onChange: (e) => {
-                                    let val = e.target.value.replace(/[^0-9.,]/g, '');
+                                    const val = e.target.value.replace(/[^0-9.,]/g, '');
                                     e.target.value = val;
                                 },
                                 onBlur: (e) => {
-                                    let val = e.target.value.replace(/,/g, '');
+                                    const val = e.target.value.replace(/,/g, '');
                                     if (!isNaN(Number(val)) && val !== '') {
                                         setValue("priceVal", Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
                                     }

@@ -33,7 +33,7 @@ export const bookGet = createAsyncThunk(
 // เพิ่มรายการจองใหม่ (Create)
 export const InsertBook = createAsyncThunk(
   'book/insert',
-  async (newBooking: Partial<Booking> & Record<string, any>, { rejectWithValue }) => {
+  async (newBooking: Partial<Booking> & Record<string, unknown>, { rejectWithValue }) => {
     const { data, error } = await supabase
       .from('BookingTable')
       .insert([newBooking])
@@ -48,7 +48,7 @@ export const InsertBook = createAsyncThunk(
 // แก้ไขรายการจอง (Update)
 export const UpdateBook = createAsyncThunk(
   'book/update',
-  async ({ id, updates }: { id: number; updates: Partial<Booking> & Record<string, any> }, { rejectWithValue }) => {
+  async ({ id, updates }: { id: number; updates: Partial<Booking> & Record<string, unknown> }, { rejectWithValue }) => {
     const { data, error } = await supabase
       .from('BookingTable')
       .update(updates)
