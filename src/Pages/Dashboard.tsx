@@ -9,7 +9,7 @@ import {
     PieChart, Pie, Cell,
     BarChart, Bar,
 } from 'recharts'
-import { CalendarDays, TrendingUp, Receipt, CheckCircle2, XCircle, BarChart3, Calendar, Filter } from 'lucide-react'
+import { CalendarDays, TrendingUp, BarChart3, Calendar, Filter, Coins, Receipt, CreditCard } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
 
 type TimeRange = '7d' | '14d' | '30d' | '6m' | '12m' | 'year'
@@ -68,10 +68,19 @@ const DashboardPage: React.FC = () => {
     const kpis = useMemo(() => {
         const total = filteredBookings.length
         const revenue = filteredBookings.reduce((s, b) => s + (b.Summary || 0), 0)
+
+        // คำนวณรายได้เฉลี่ยต่อเดือนจากจำนวนเดือนที่มีข้อมูล
+        const uniqueMonths = new Set(filteredBookings.map(b => b.Date ? b.Date.substring(0, 7) : "").filter(Boolean))
+        const monthsCount = uniqueMonths.size || 1 // ป้องกันหารด้วยศูนย์
+        const avgMonthlyRevenue = revenue / monthsCount
+
+        // ภาษีที่หักรวม
         const tax = filteredBookings.reduce((s, b) => s + (b.Tax || 0), 0)
-        const completed = filteredBookings.filter(b => b.Status === 'Completed').length
-        const canceled = filteredBookings.filter(b => b.Status === 'Canceled').length
-        return { total, revenue, tax, completed, canceled }
+
+        // รายได้เฉลี่ยต่องาน
+        const avgRevenuePerBooking = total > 0 ? revenue / total : 0
+
+        return { total, revenue, avgMonthlyRevenue, tax, avgRevenuePerBooking }
     }, [filteredBookings])
 
     // ========== Revenue Trend ==========
@@ -147,41 +156,50 @@ const DashboardPage: React.FC = () => {
 
     // ========== Top Customers ==========
     const topCustomers = useMemo(() => {
-        const map = new Map<string, number>()
+        const map = new Map<string, { count: number, revenue: number }>()
         filteredBookings.forEach(b => {
             const name = b.CustomerMaster?.CustomerName || 'ไม่ระบุ'
-            map.set(name, (map.get(name) || 0) + 1)
+            const existing = map.get(name) || { count: 0, revenue: 0 }
+            existing.count += 1
+            existing.revenue += (b.Summary || 0)
+            map.set(name, existing)
         })
         return Array.from(map.entries())
-            .sort((a, b) => b[1] - a[1])
+            .sort((a, b) => b[1].count - a[1].count)
             .slice(0, 5)
-            .map(([name, count]) => ({ name, count }))
+            .map(([name, data]) => ({ name, count: data.count, revenue: data.revenue }))
     }, [filteredBookings])
 
     // ========== Top Job Types ==========
     const topJobTypes = useMemo(() => {
-        const map = new Map<string, number>()
+        const map = new Map<string, { count: number, revenue: number }>()
         filteredBookings.forEach(b => {
             const name = b.JobTypeMaster?.TypeName || 'ไม่ระบุ'
-            map.set(name, (map.get(name) || 0) + (b.Summary || 0))
+            const existing = map.get(name) || { count: 0, revenue: 0 }
+            existing.count += 1
+            existing.revenue += (b.Summary || 0)
+            map.set(name, existing)
         })
         return Array.from(map.entries())
-            .sort((a, b) => b[1] - a[1])
+            .sort((a, b) => b[1].revenue - a[1].revenue)
             .slice(0, 5)
-            .map(([name, revenue]) => ({ name, revenue }))
+            .map(([name, data]) => ({ name, count: data.count, revenue: data.revenue }))
     }, [filteredBookings])
 
     // ========== Top Locations ==========
     const topLocations = useMemo(() => {
-        const map = new Map<string, number>()
+        const map = new Map<string, { count: number, revenue: number }>()
         filteredBookings.forEach(b => {
             const name = b.LocationMaster?.LocationName || 'ไม่ระบุ'
-            map.set(name, (map.get(name) || 0) + 1)
+            const existing = map.get(name) || { count: 0, revenue: 0 }
+            existing.count += 1
+            existing.revenue += (b.Summary || 0)
+            map.set(name, existing)
         })
         return Array.from(map.entries())
-            .sort((a, b) => b[1] - a[1])
+            .sort((a, b) => b[1].count - a[1].count)
             .slice(0, 5)
-            .map(([name, count]) => ({ name, count }))
+            .map(([name, data]) => ({ name, count: data.count, revenue: data.revenue }))
     }, [filteredBookings])
 
     // ========== Tooltip Style ==========
@@ -288,10 +306,10 @@ const DashboardPage: React.FC = () => {
                 {/* ===== KPI Cards ===== */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                     <KpiCard icon={<CalendarDays className="w-5 h-5" />} label="การจองทั้งหมด" value={kpis.total.toLocaleString()} color="blue" />
+                    <KpiCard icon={<CreditCard className="w-5 h-5" />} label="เฉลี่ยต่องาน" value={`${kpis.avgRevenuePerBooking.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`} color="blue" />
+                    <KpiCard icon={<Coins className="w-5 h-5" />} label="เฉลี่ยต่อเดือน" value={`${kpis.avgMonthlyRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`} color="amber" />
                     <KpiCard icon={<TrendingUp className="w-5 h-5" />} label="รายได้รวม" value={`${kpis.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`} color="emerald" />
-                    <KpiCard icon={<Receipt className="w-5 h-5" />} label="ภาษีที่หักรวม" value={`${kpis.tax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`} color="amber" />
-                    <KpiCard icon={<CheckCircle2 className="w-5 h-5" />} label="เสร็จสิ้น" value={kpis.completed.toLocaleString()} color="green" />
-                    <KpiCard icon={<XCircle className="w-5 h-5" />} label="ยกเลิก" value={kpis.canceled.toLocaleString()} color="red" />
+                    <KpiCard icon={<Receipt className="w-5 h-5" />} label="ภาษีรวม" value={`${kpis.tax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`} color="amber" />
                 </div>
 
                 {/* ===== Revenue Trend ===== */}
@@ -423,7 +441,14 @@ const DashboardPage: React.FC = () => {
                                                 <span className="text-xs font-bold text-[#6e6e80] dark:text-[#8e8ea0] w-5">#{i + 1}</span>
                                                 {c.name}
                                             </span>
-                                            <span className="text-[#6e6e80] dark:text-[#8e8ea0] text-xs">{c.count} รายการ</span>
+                                            <div className="text-right">
+                                                <span className="text-[#0d0d0d] dark:text-[#ececf1] text-xs block font-medium">
+                                                    {c.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿
+                                                </span>
+                                                <span className="text-[#6e6e80] dark:text-[#8e8ea0] text-[10px]">
+                                                    {c.count} รายการ
+                                                </span>
+                                            </div>
                                         </div>
                                         <div className="w-full h-2.5 rounded-full bg-[#f7f7f8] dark:bg-[#1a1a1a] overflow-hidden">
                                             <div className="h-full rounded-full bg-blue-500 transition-all duration-500" style={{ width: `${pct}%` }} />
@@ -452,7 +477,14 @@ const DashboardPage: React.FC = () => {
                                                 <span className="text-xs font-bold text-[#6e6e80] dark:text-[#8e8ea0] w-5">#{i + 1}</span>
                                                 {j.name}
                                             </span>
-                                            <span className="text-[#6e6e80] dark:text-[#8e8ea0] text-xs">{j.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท</span>
+                                            <div className="text-right">
+                                                <span className="text-[#0d0d0d] dark:text-[#ececf1] text-xs block font-medium">
+                                                    {j.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿
+                                                </span>
+                                                <span className="text-[#6e6e80] dark:text-[#8e8ea0] text-[10px]">
+                                                    {j.count} รายการ
+                                                </span>
+                                            </div>
                                         </div>
                                         <div className="w-full h-2.5 rounded-full bg-[#f7f7f8] dark:bg-[#1a1a1a] overflow-hidden">
                                             <div className="h-full rounded-full bg-emerald-500 transition-all duration-500" style={{ width: `${pct}%` }} />
@@ -482,7 +514,14 @@ const DashboardPage: React.FC = () => {
                                             <span className="text-xs font-bold text-[#6e6e80] dark:text-[#8e8ea0] w-5">#{i + 1}</span>
                                             {l.name}
                                         </span>
-                                        <span className="text-[#6e6e80] dark:text-[#8e8ea0] text-xs">{l.count} รายการ</span>
+                                        <div className="text-right">
+                                            <span className="text-[#0d0d0d] dark:text-[#ececf1] text-xs block font-medium">
+                                                {l.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿
+                                            </span>
+                                            <span className="text-[#6e6e80] dark:text-[#8e8ea0] text-[10px]">
+                                                {l.count} รายการ
+                                            </span>
+                                        </div>
                                     </div>
                                     <div className="w-full h-2.5 rounded-full bg-[#f7f7f8] dark:bg-[#1a1a1a] overflow-hidden">
                                         <div className="h-full rounded-full bg-violet-500 transition-all duration-500" style={{ width: `${pct}%` }} />
