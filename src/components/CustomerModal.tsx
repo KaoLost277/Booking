@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { X, User, Facebook } from 'lucide-react'
 import CustomButton from './CustomButton'
 import CustomInput from './CustomInput'
-import { useAppDispatch } from '../hooks'
+import { useAppDispatch, useAppSelector } from '../hooks'
 import { addCustomer, updateCustomer, fetchCustomers } from '../features/customerSlice'
 import type { CustomerMaster } from '../types/booking'
 
@@ -20,8 +20,10 @@ interface FormValues {
 
 const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, editingCustomer }) => {
     const dispatch = useAppDispatch()
+    const { customers } = useAppSelector((state) => state.masterData)
     const isEditMode = !!editingCustomer
     const [submitting, setSubmitting] = useState(false)
+    const [duplicateError, setDuplicateError] = useState('')
 
     const {
         register,
@@ -47,10 +49,24 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, editingC
                 facebookIink: ''
             })
         }
+        setDuplicateError('')
     }, [isOpen, editingCustomer, reset])
 
     const onSubmit = async (data: FormValues) => {
+        setDuplicateError('')
         setSubmitting(true)
+
+        // ตรวจสอบข้อมูลซ้ำ
+        const isDuplicate = customers.some(
+            (c) => c.CustomerName.toLowerCase() === data.customerName.toLowerCase() && (!isEditMode || c.ID !== editingCustomer?.ID)
+        )
+
+        if (isDuplicate) {
+            setDuplicateError('ข้อมูลลูกค้านี้มีอยู่แล้วในระบบ')
+            setSubmitting(false)
+            return
+        }
+
         try {
             const customerData = {
                 CustomerName: data.customerName,
@@ -109,6 +125,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, editingC
                             {...register("customerName", { required: "กรุณาระบุชื่อลูกค้า" })}
                         />
                         {errors.customerName && <p className="text-xs text-red-500">{errors.customerName.message}</p>}
+                        {duplicateError && <p className="text-xs text-red-500">{duplicateError}</p>}
                     </div>
 
                     <div className="space-y-1">

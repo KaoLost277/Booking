@@ -157,3 +157,129 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: #8e8ea0;
 }
+
+/* ─── FullCalendar Custom Modern Theme ────────────────────────── */
+.fc-theme-custom {
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: var(--background);
+  --fc-neutral-bg-color: var(--secondary);
+  --fc-event-text-color: #ffffff;
+  --fc-today-bg-color: rgba(16, 163, 127, 0.05);
+  /* subtle emerald for today */
+  --fc-highlight-color: rgba(16, 163, 127, 0.1);
+  --fc-button-bg-color: var(--secondary);
+  --fc-button-border-color: var(--border);
+  --fc-button-text-color: var(--foreground);
+  --fc-button-hover-bg-color: var(--muted);
+  --fc-button-hover-border-color: var(--border);
+  --fc-button-active-bg-color: var(--primary);
+  --fc-button-active-border-color: var(--primary);
+  --fc-button-active-text-color: var(--primary-foreground);
+
+  font-family: inherit;
+}
+
+.dark .fc-theme-custom {
+  --fc-today-bg-color: rgba(16, 163, 127, 0.15);
+  --fc-highlight-color: rgba(16, 163, 127, 0.2);
+}
+
+/* Base structural adjustments */
+.fc-theme-custom .fc-view-harness {
+  background-color: var(--card);
+}
+
+/* Modernize buttons */
+.fc-theme-custom .fc-button {
+  border-radius: var(--radius-md) !important;
+  font-weight: 500 !important;
+  text-transform: capitalize;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.875rem !important;
+}
+
+.fc-theme-custom .fc-button-primary:not(:disabled):active,
+.fc-theme-custom .fc-button-primary:not(:disabled).fc-button-active {
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06) !important;
+  color: var(--fc-button-active-text-color) !important;
+}
+
+/* Styled like a modern segmented control */
+.fc-theme-custom .fc-button-group {
+  background-color: var(--muted) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 4px !important;
+  gap: 2px;
+}
+
+.fc-theme-custom .fc-button-group>.fc-button {
+  border: none !important;
+  background-color: transparent !important;
+  color: var(--muted-foreground) !important;
+  box-shadow: none !important;
+  border-radius: calc(var(--radius-md) - 2px) !important;
+}
+
+.fc-theme-custom .fc-button-group>.fc-button:hover {
+  color: var(--foreground) !important;
+}
+
+.fc-theme-custom .fc-button-group>.fc-button.fc-button-active {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Modernize Header Title */
+.fc-theme-custom .fc-toolbar-title {
+  font-weight: 600 !important;
+  font-size: 1.25rem !important;
+  color: var(--foreground);
+}
+
+/* Modernize Events */
+.fc-theme-custom .fc-event {
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-width: 1px !important;
+}
+
+.fc-theme-custom .fc-event:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 0.95;
+}
+
+.fc-theme-custom .fc-event-main {
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+/* Modernize TimeGrid Time Axis */
+.fc-theme-custom .fc-timegrid-slot-label-cushion,
+.fc-theme-custom .fc-timegrid-axis-cushion {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Header Cells (Days) */
+.fc-theme-custom .fc-col-header-cell-cushion {
+  color: var(--muted-foreground);
+  font-weight: 600;
+  padding: 8px 4px !important;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+/* Today Header Cell Highlight */
+.fc-theme-custom .fc-day-today .fc-col-header-cell-cushion {
+  color: #10a37f;
+  /* OpenAI Emerald */
+}

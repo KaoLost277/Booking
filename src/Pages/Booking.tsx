@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import Navbars from '../components/Navbars.tsx'
-import BookingTable from '../components/BookingTable.tsx'
-import BookingFilter from '../components/BookingFilter.tsx'
-import type { FilterValues } from '../components/BookingFilter';
-import CustomButton from '../components/CustomButton.tsx'
-import { Plus, CalendarDays } from 'lucide-react'
+import BookingTable from '../components/BookingTable'
+import BookingCalendar from '../components/BookingCalendar'
+import BookingFilter from '../components/BookingFilter'
+import type { FilterValues } from '../components/BookingFilter'
+import CustomButton from '../components/CustomButton'
+import { Plus, CalendarDays, List, Calendar as CalendarIcon } from 'lucide-react'
 import BookingModal from '../components/BookingModal';
 import { useAppDispatch } from "../hooks";
 import { fetchMasterData } from "../features/masterDataSlice";
@@ -19,6 +20,8 @@ function BookingLayout() {
   const [deleteConfirm, setDeleteConfirm] = useState<Booking | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [filterValues, setFilterValues] = useState<FilterValues | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'calendar'>('calendar');
+  const [initialBookingData, setInitialBookingData] = useState<{ date?: Date, start?: Date, end?: Date } | null>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -37,8 +40,13 @@ function BookingLayout() {
   }, [dispatch]);
 
   // เปิด Modal โหมดเพิ่มใหม่
-  const handleNewBooking = () => {
+  const handleNewBooking = (start?: Date | any, end?: Date | any) => {
     setEditingBooking(null);
+    if (start instanceof Date && end instanceof Date) {
+      setInitialBookingData({ date: start, start, end });
+    } else {
+      setInitialBookingData(null);
+    }
     setIsModalOpen(true);
   };
 
@@ -52,6 +60,7 @@ function BookingLayout() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingBooking(null);
+    setInitialBookingData(null);
   };
 
   // เปิด Confirm ลบ
@@ -99,7 +108,33 @@ function BookingLayout() {
             </div>
 
             {/* Actions */}
-            <div ref={heroButtonRef} className="flex items-center gap-3">
+            <div ref={heroButtonRef} className="flex flex-col sm:flex-row items-center gap-3">
+              {/* View Toggle */}
+              <div className="flex bg-[#f7f7f8] dark:bg-[#1a1a1a] p-1 rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a]">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('calendar')}
+                  className={`flex flex-1 items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === 'calendar'
+                    ? 'bg-white dark:bg-[#353740] text-[#0d0d0d] dark:text-[#ececf1] shadow-sm'
+                    : 'text-[#6e6e80] dark:text-[#8e8ea0] hover:text-[#0d0d0d] dark:hover:text-[#ececf1]'
+                    }`}
+                >
+                  <CalendarIcon className="w-4 h-4" />
+                  ปฏิทิน
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('table')}
+                  className={`flex flex-1 items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === 'table'
+                    ? 'bg-white dark:bg-[#353740] text-[#0d0d0d] dark:text-[#ececf1] shadow-sm'
+                    : 'text-[#6e6e80] dark:text-[#8e8ea0] hover:text-[#0d0d0d] dark:hover:text-[#ececf1]'
+                    }`}
+                >
+                  <List className="w-4 h-4" />
+                  ตาราง
+                </button>
+              </div>
+
               <CustomButton onClick={handleNewBooking}>
                 <Plus className="w-5 h-5" />
                 เพิ่มการจองใหม่
@@ -119,12 +154,20 @@ function BookingLayout() {
           />
         </div>
 
-        {/* Table */}
-        <BookingTable
-          onEdit={handleEditBooking}
-          onDelete={handleDeleteBooking}
-          filters={filterValues}
-        />
+        {/* Dynamic View (Table or Calendar) */}
+        {viewMode === 'table' ? (
+          <BookingTable
+            onEdit={handleEditBooking}
+            onDelete={handleDeleteBooking}
+            filters={filterValues}
+          />
+        ) : (
+          <BookingCalendar
+            onEdit={handleEditBooking}
+            onSelect={handleNewBooking}
+            filters={filterValues}
+          />
+        )}
       </main>
 
       {/* Booking Modal (เพิ่ม / แก้ไข) */}
@@ -132,6 +175,9 @@ function BookingLayout() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         editingBooking={editingBooking}
+        initialDate={initialBookingData?.date}
+        initialStartTime={initialBookingData?.start}
+        initialEndTime={initialBookingData?.end}
       />
 
       {/* Delete Confirmation Dialog */}

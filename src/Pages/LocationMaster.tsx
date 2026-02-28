@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Plus, Search, MapPin, ExternalLink, Copy, Check, Map } from 'lucide-react'
+import { Plus, Search, MapPin, ExternalLink, Copy, Check, Map, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../hooks'
 import { fetchLocations, deleteLocation } from '../features/locationSlice'
 import LocationModal from '../components/LocationModal'
@@ -44,6 +44,29 @@ const LocationMasterPage: React.FC = () => {
         l.LocationName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         l.Locationlink?.toLowerCase().includes(searchTerm.toLowerCase())
     )
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1)
+    const itemsPerPage = 10
+
+    // Reset pagination when search changes
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [filteredLocations])
+
+    // Pagination Logic
+    const totalItems = filteredLocations.length
+    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const paginatedData = filteredLocations.slice(startIndex, startIndex + itemsPerPage)
+
+    const prevPage = () => {
+        if (currentPage > 1) setCurrentPage(p => p - 1)
+    }
+
+    const nextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(p => p + 1)
+    }
 
     return (
         <div className="min-h-dvh bg-white dark:bg-[#0d0d0d] transition-colors duration-200">
@@ -129,14 +152,14 @@ const LocationMasterPage: React.FC = () => {
                                             กำลังโหลดข้อมูล...
                                         </td>
                                     </tr>
-                                ) : filteredLocations.length === 0 ? (
+                                ) : paginatedData.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="p-8 text-center text-[#6e6e80] dark:text-[#8e8ea0]">
                                             ไม่พบข้อมูลสถานที่
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredLocations.map((location) => (
+                                    paginatedData.map((location) => (
                                         <tr key={location.ID} className="hover:bg-[#f7f7f8] dark:hover:bg-[#1a1a1a] transition-colors group">
                                             <td className="p-4 font-medium text-[#acacbe] dark:text-[#565869]">#{location.ID}</td>
                                             <td className="p-4">
@@ -209,12 +232,12 @@ const LocationMasterPage: React.FC = () => {
                             <div className="text-center py-8 text-[#6e6e80] dark:text-[#8e8ea0] animate-pulse">
                                 กำลังโหลดข้อมูล...
                             </div>
-                        ) : filteredLocations.length === 0 ? (
+                        ) : paginatedData.length === 0 ? (
                             <div className="text-center py-8 text-[#6e6e80] dark:text-[#8e8ea0]">
                                 ไม่พบข้อมูลสถานที่
                             </div>
                         ) : (
-                            filteredLocations.map((location) => (
+                            paginatedData.map((location) => (
                                 <div
                                     key={location.ID}
                                     className="rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] p-4 bg-white dark:bg-[#1a1a1a] transition-colors"
@@ -284,6 +307,34 @@ const LocationMasterPage: React.FC = () => {
                             ))
                         )}
                     </div>
+
+                    {/* Pagination Controls */}
+                    {totalItems > 0 && (
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-1">
+                            <div className="text-sm text-[#6e6e80] dark:text-[#8e8ea0]">
+                                แสดง <span className="font-semibold text-[#0d0d0d] dark:text-[#ececf1]">{startIndex + 1}</span> ถึง <span className="font-semibold text-[#0d0d0d] dark:text-[#ececf1]">{Math.min(startIndex + itemsPerPage, totalItems)}</span> จากทั้งหมด <span className="font-semibold text-[#0d0d0d] dark:text-[#ececf1]">{totalItems}</span> รายการ
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={prevPage}
+                                    disabled={currentPage === 1}
+                                    className="p-2 rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] text-[#0d0d0d] dark:text-[#ececf1] bg-white dark:bg-[#1a1a1a] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#f7f7f8] dark:hover:bg-[#2a2a2a] transition-colors flex items-center gap-1 text-sm font-medium"
+                                >
+                                    <ChevronLeft className="w-4 h-4" /> ก่อนหน้า
+                                </button>
+                                <div className="text-sm font-medium text-[#0d0d0d] dark:text-[#ececf1] px-4">
+                                    หน้า {currentPage} / {totalPages}
+                                </div>
+                                <button
+                                    onClick={nextPage}
+                                    disabled={currentPage === totalPages}
+                                    className="p-2 rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] text-[#0d0d0d] dark:text-[#ececf1] bg-white dark:bg-[#1a1a1a] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#f7f7f8] dark:hover:bg-[#2a2a2a] transition-colors flex items-center gap-1 text-sm font-medium"
+                                >
+                                    ถัดไป <ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </main>
 

@@ -33,10 +33,10 @@ export const bookGet = createAsyncThunk(
 // เพิ่มรายการจองใหม่ (Create)
 export const InsertBook = createAsyncThunk(
   'book/insert',
-  async (newBooking: Partial<Booking> & Record<string, unknown>, { rejectWithValue }) => {
+  async (newBookings: (Partial<Booking> & Record<string, unknown>)[], { rejectWithValue }) => {
     const { data, error } = await supabase
       .from('BookingTable')
-      .insert([newBooking])
+      .insert(newBookings)
       .select()
 
     if (error) return rejectWithValue(error.message)

@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { X, MapPin, Link as LinkIcon } from 'lucide-react'
 import CustomButton from './CustomButton'
 import CustomInput from './CustomInput'
-import { useAppDispatch } from '../hooks'
+import { useAppDispatch, useAppSelector } from '../hooks'
 import { addLocation, updateLocation, fetchLocations } from '../features/locationSlice'
 import type { LocationMaster } from '../types/booking'
 
@@ -20,8 +20,10 @@ interface FormValues {
 
 const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose, editingLocation }) => {
     const dispatch = useAppDispatch()
+    const { locations } = useAppSelector((state) => state.masterData)
     const isEditMode = !!editingLocation
     const [submitting, setSubmitting] = useState(false)
+    const [duplicateError, setDuplicateError] = useState('')
 
     const {
         register,
@@ -47,10 +49,24 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose, editingL
                 locationlink: ''
             })
         }
+        setDuplicateError('')
     }, [isOpen, editingLocation, reset])
 
     const onSubmit = async (data: FormValues) => {
+        setDuplicateError('')
         setSubmitting(true)
+
+        // ตรวจสอบข้อมูลซ้ำ
+        const isDuplicate = locations.some(
+            (l) => l.LocationName.toLowerCase() === data.locationName.toLowerCase() && (!isEditMode || l.ID !== editingLocation?.ID)
+        )
+
+        if (isDuplicate) {
+            setDuplicateError('ข้อมูลสถานที่นี้มีอยู่แล้วในระบบ')
+            setSubmitting(false)
+            return
+        }
+
         try {
             const locationData = {
                 LocationName: data.locationName,
@@ -109,6 +125,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose, editingL
                             {...register("locationName", { required: "กรุณาระบุชื่อสถานที่" })}
                         />
                         {errors.locationName && <p className="text-xs text-red-500">{errors.locationName.message}</p>}
+                        {duplicateError && <p className="text-xs text-red-500">{duplicateError}</p>}
                     </div>
 
                     <div className="space-y-1">
