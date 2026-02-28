@@ -86,6 +86,8 @@ const BookingItemRow = ({
     const [overlapError, setOverlapError] = useState<string>('')
     const [checkingOverlap, setCheckingOverlap] = useState(false)
     const overlapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    // Skip the first price recalc when form is pre-filled in edit mode
+    const skipPriceCalcRef = useRef(!!editingBooking)
 
     const watchedStartHour = watch(`items.${index}.startHour`)
     const watchedStartMinute = watch(`items.${index}.startMinute`)
@@ -122,6 +124,11 @@ const BookingItemRow = ({
         }
 
         if (selectedJobType) {
+            // Skip auto price recalc on first load in edit mode (preserve saved price)
+            if (skipPriceCalcRef.current) {
+                skipPriceCalcRef.current = false
+                return
+            }
             const calculatedPrice = diffMinutes * selectedJobType.PriceUnitMinutes
             setValue(`items.${index}.price`, formatCurrency(calculatedPrice), { shouldValidate: true, shouldDirty: true })
         }
@@ -549,8 +556,8 @@ const BookingModal: React.FC<BookingModalProps> = ({
     }, [watchedJobType, jobTypes])
 
     const jobOptions = (jobTypes || []).map((j) => ({ id: j.ID, label: j.TypeName }));
-    const customerOptions = (customers || []).map((c) => ({ id: c.ID, label: c.CustomerName }));
-    const locationOptions = (locations || []).map((l) => ({ id: l.ID, label: l.LocationName }));
+    const customerOptions = (customers || []).map((c) => ({ id: c.ID, label: c.CustomerName })).sort((a, b) => a.label.localeCompare(b.label, 'th'));
+    const locationOptions = (locations || []).map((l) => ({ id: l.ID, label: l.LocationName })).sort((a, b) => a.label.localeCompare(b.label, 'th'));
 
     const onSubmit = async (data: FormValues) => {
         setSubmitting(true)
@@ -634,8 +641,9 @@ const BookingModal: React.FC<BookingModalProps> = ({
                     {/* Shared Fields (Location, Date, JobType) */}
                     <div className="bg-white dark:bg-[#1a1a1a] p-4 rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] shadow-sm">
                         <h3 className="font-medium text-[#0d0d0d] dark:text-[#ececf1] mb-4">ข้อมูลร่วม (Shared Details)</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                            <div className="col-span-1">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            {/* Location + Add button - full row */}
+                            <div className="col-span-1 md:col-span-2">
                                 <Controller
                                     name="location"
                                     control={control}
@@ -671,6 +679,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                                 />
                             </div>
 
+                            {/* Date */}
                             <div className="col-span-1">
                                 <label className="block text-sm font-medium text-[#6e6e80] dark:text-[#8e8ea0] mb-1.5 flex items-center gap-1">
                                     <Calendar className="w-4 h-4" /> วันที่ (Date)
@@ -703,6 +712,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                                 {errors.date && <p className="text-xs text-red-500 font-medium mt-1">{errors.date.message}</p>}
                             </div>
 
+                            {/* Job Type */}
                             <div className="col-span-1">
                                 <Controller
                                     name="jobType"
@@ -725,6 +735,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                                 />
                             </div>
                         </div>
+
                     </div>
 
                     {/* Customers Items Array */}

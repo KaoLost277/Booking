@@ -5,6 +5,7 @@ import CustomButton from './CustomButton'
 import CustomInput from './CustomInput'
 import { useAppDispatch, useAppSelector } from '../hooks'
 import { addLocation, updateLocation, fetchLocations } from '../features/locationSlice'
+import { fetchMasterData } from '../features/masterDataSlice'
 import type { LocationMaster } from '../types/booking'
 
 interface LocationModalProps {
@@ -81,6 +82,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose, editingL
             }
 
             await dispatch(fetchLocations())
+            await dispatch(fetchMasterData())
             onClose()
         } catch (err) {
             console.error('Failed to save location:', err)

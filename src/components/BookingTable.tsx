@@ -97,7 +97,7 @@ function BookingTable({ onEdit, onDelete, filters }: BookingTableProps) {
   // Reset pagination when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [filtered]);
+  }, [filters]);
 
   const formatDate = (date: string) => {
     try {

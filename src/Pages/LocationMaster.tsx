@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { Plus, Search, MapPin, ExternalLink, Copy, Check, Map, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../hooks'
 import { fetchLocations, deleteLocation } from '../features/locationSlice'
@@ -40,10 +40,10 @@ const LocationMasterPage: React.FC = () => {
         }
     }
 
-    const filteredLocations = locations.filter(l =>
+    const filteredLocations = useMemo(() => locations.filter(l =>
         l.LocationName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         l.Locationlink?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    ), [locations, searchTerm])
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1)
@@ -52,7 +52,7 @@ const LocationMasterPage: React.FC = () => {
     // Reset pagination when search changes
     useEffect(() => {
         setCurrentPage(1)
-    }, [filteredLocations])
+    }, [searchTerm])
 
     // Pagination Logic
     const totalItems = filteredLocations.length
