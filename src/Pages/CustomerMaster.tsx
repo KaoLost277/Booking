@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { Plus, Search, User, Users, ExternalLink, Copy, Check, FileText, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../hooks'
 import { fetchCustomers, deleteCustomer } from '../features/customerSlice'
@@ -43,10 +43,10 @@ const CustomerMasterPage: React.FC = () => {
         }
     }
 
-    const filteredCustomers = customers.filter(c =>
+    const filteredCustomers = useMemo(() => customers.filter(c =>
         c.CustomerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.FacebookIink?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    ), [customers, searchTerm])
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1)
@@ -55,7 +55,7 @@ const CustomerMasterPage: React.FC = () => {
     // Reset pagination when search changes
     useEffect(() => {
         setCurrentPage(1)
-    }, [filteredCustomers])
+    }, [searchTerm])
 
     // Pagination Logic
     const totalItems = filteredCustomers.length
