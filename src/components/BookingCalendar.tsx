@@ -24,6 +24,14 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ onEdit, onSelect, fil
         if (!filters) return rawBookings;
 
         return rawBookings.filter((b) => {
+            // กรองข้อความค้นหา (searchText)
+            if (filters.searchText) {
+                const text = filters.searchText.toLowerCase();
+                const matchCustomer = (b.CustomerMaster?.CustomerName || '').toLowerCase().includes(text);
+                const matchLocation = (b.LocationMaster?.LocationName || '').toLowerCase().includes(text);
+                const matchJobType = (b.JobTypeMaster?.TypeName || '').toLowerCase().includes(text);
+                if (!matchCustomer && !matchLocation && !matchJobType) return false;
+            }
             // กรองวันที่
             if (filters.date && b.Date !== filters.date) return false;
             // กรองลูกค้า

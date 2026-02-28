@@ -3,9 +3,7 @@ import { useForm, Controller, useFieldArray } from 'react-hook-form'
 import {
     X, Calendar, Clock, MapPin, User, Briefcase, Activity, Plus
 } from 'lucide-react'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
-import { parse, format } from 'date-fns'
+import { format } from 'date-fns'
 import CustomButton from './CustomButton'
 import CustomInput from './CustomInput'
 import SearchableSelect from './SearchableSelect'
@@ -434,7 +432,8 @@ const BookingModal: React.FC<BookingModalProps> = ({
     const user = useAppSelector((state) => state.auth.user)
     const dispatch = useAppDispatch()
 
-    const isEditMode = !!editingBooking
+    // โหมดแก้ไขจะทำงานก็ต่อเมื่อมี editingBooking และมี ID
+    const isEditMode = !!editingBooking?.ID
     const [submitting, setSubmitting] = useState(false)
     const [rowErrors, setRowErrors] = useState<Record<number, { timeError: string, overlapError: string, checkingOverlap: boolean }>>({})
 
@@ -582,7 +581,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                 }
             })
 
-            if (isEditMode && editingBooking) {
+            if (isEditMode && editingBooking?.ID) {
                 // อัปเดตรายการเดียว
                 await dispatch(UpdateBook({ id: editingBooking.ID, updates: bookingsToInsert[0] })).unwrap()
             } else {
@@ -688,26 +687,15 @@ const BookingModal: React.FC<BookingModalProps> = ({
                                     name="date"
                                     control={control}
                                     rules={{ required: "กรุณาระบุวันที่" }}
-                                    render={({ field }) => {
-                                        const selectedDate = field.value && /^\d{4}-\d{2}-\d{2}$/.test(field.value)
-                                            ? parse(field.value, 'yyyy-MM-dd', new Date())
-                                            : null
-                                        return (
-                                            <div>
-                                                <DatePicker
-                                                    selected={selectedDate}
-                                                    onChange={(date: Date | null) => {
-                                                        if (date) field.onChange(format(date, 'yyyy-MM-dd'))
-                                                        else field.onChange('')
-                                                    }}
-                                                    dateFormat="dd/MM/yyyy"
-                                                    placeholderText="dd/mm/yyyy"
-                                                    className={`block w-full h-[42px] px-3 rounded-lg border bg-white dark:bg-[#1a1a1a] text-sm text-[#0d0d0d] dark:text-[#ececf1] outline-none transition-all ${errors.date ? 'border-red-500 focus:border-red-500 ring-1 ring-red-500/10' : 'border-[#e5e5e5] dark:border-[#2a2a2a] hover:border-[#c5c5d2] dark:hover:border-[#444654] focus:border-[#0d0d0d] dark:focus:border-[#ececf1] focus:ring-1 focus:ring-[#0d0d0d]/10 dark:focus:ring-[#ececf1]/10'}`}
-                                                    autoComplete="off"
-                                                />
-                                            </div>
-                                        )
-                                    }}
+                                    render={({ field }) => (
+                                        <div className="relative group">
+                                            <input
+                                                type="date"
+                                                {...field}
+                                                className={`block w-full h-[42px] px-3 rounded-lg border bg-white dark:bg-[#1a1a1a] text-sm text-[#0d0d0d] dark:text-[#ececf1] outline-none transition-all ${errors.date ? 'border-red-500 focus:border-red-500 ring-1 ring-red-500/10' : 'border-[#e5e5e5] dark:border-[#2a2a2a] hover:border-[#c5c5d2] dark:hover:border-[#444654] focus:border-[#0d0d0d] dark:focus:border-[#ececf1] focus:ring-1 focus:ring-[#0d0d0d]/10 dark:focus:ring-[#ececf1]/10'}`}
+                                            />
+                                        </div>
+                                    )}
                                 />
                                 {errors.date && <p className="text-xs text-red-500 font-medium mt-1">{errors.date.message}</p>}
                             </div>
