@@ -5,6 +5,7 @@ import CustomButton from './CustomButton'
 import CustomInput from './CustomInput'
 import { useAppDispatch, useAppSelector } from '../hooks'
 import { addCustomer, updateCustomer, fetchCustomers } from '../features/customerSlice'
+import { fetchMasterData } from '../features/masterDataSlice'
 import type { CustomerMaster } from '../types/booking'
 
 interface CustomerModalProps {
@@ -81,6 +82,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, editingC
             }
 
             await dispatch(fetchCustomers())
+            await dispatch(fetchMasterData())
             onClose()
         } catch (err) {
             console.error('Failed to save customer:', err)

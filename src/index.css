@@ -283,3 +283,19 @@ html {
   color: #10a37f;
   /* OpenAI Emerald */
 }
+
+/* Fix: ensure timegrid event harness respects FC column splitting layout */
+.fc-theme-custom .fc-timegrid-event-harness {
+  position: absolute !important;
+}
+
+.fc-theme-custom .fc-timegrid-event {
+  overflow: hidden;
+}
+
+/* Fix: do not override event width so FC can compute column widths */
+.fc-theme-custom .fc-event {
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box;
+}

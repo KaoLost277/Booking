@@ -127,6 +127,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ onEdit, onSelect, fil
                         }
                     }}
                     events={events}
+                    slotEventOverlap={false}
                     eventClick={(info) => {
                         if (onEdit) {
                             onEdit(info.event.extendedProps.rawBooking as BookingType);
