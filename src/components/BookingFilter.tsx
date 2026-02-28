@@ -5,6 +5,7 @@ import SearchableSelect from './SearchableSelect';
 import { useAppSelector } from '../hooks';
 
 export interface FilterValues {
+    searchText: string;
     date: string;
     customerID: string | number;
     locationID: string | number;
@@ -18,6 +19,7 @@ interface BookingFilterProps {
 }
 
 const BookingFilter: React.FC<BookingFilterProps> = ({ onFilter, onClear }) => {
+    const [searchText, setSearchText] = useState('');
     const [date, setDate] = useState('');
     const [customer, setCustomer] = useState<string | number>('');
     const [location, setLocation] = useState<string | number>('');
@@ -44,6 +46,7 @@ const BookingFilter: React.FC<BookingFilterProps> = ({ onFilter, onClear }) => {
 
     const handleSearch = () => {
         onFilter?.({
+            searchText,
             date,
             customerID: customer,
             locationID: location,
@@ -53,6 +56,7 @@ const BookingFilter: React.FC<BookingFilterProps> = ({ onFilter, onClear }) => {
     };
 
     const handleClear = () => {
+        setSearchText('');
         setDate('');
         setCustomer('');
         setLocation('');
@@ -81,7 +85,26 @@ const BookingFilter: React.FC<BookingFilterProps> = ({ onFilter, onClear }) => {
 
             {/* Filter Body */}
             <div className={`${isExpanded ? 'block' : 'hidden'} lg:block p-5 pt-0 lg:pt-5`}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 items-end gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 items-end gap-4">
+                    {/* Search Text */}
+                    <div className="w-full">
+                        <label className="block text-xs font-medium text-[#6e6e80] dark:text-[#8e8ea0] uppercase tracking-wider mb-1.5 ml-0.5">
+                            ค้นหา
+                        </label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <Search className="h-4 w-4 text-[#acacbe] dark:text-[#6e6e80] group-hover:text-[#6e6e80] dark:group-hover:text-[#8e8ea0] transition-colors" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="ชื่อลูกค้า, สถานที่, งาน..."
+                                className="block w-full h-11 pl-9 pr-3 rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] text-sm text-[#0d0d0d] dark:text-[#ececf1] outline-none transition-all hover:border-[#c5c5d2] dark:hover:border-[#444654] focus:border-[#0d0d0d] dark:focus:border-[#ececf1] focus:ring-1 focus:ring-[#0d0d0d]/10 dark:focus:ring-[#ececf1]/10"
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            />
+                        </div>
+                    </div>
                     {/* Date Filter */}
                     <div className="w-full">
                         <label className="block text-xs font-medium text-[#6e6e80] dark:text-[#8e8ea0] uppercase tracking-wider mb-1.5 ml-0.5">

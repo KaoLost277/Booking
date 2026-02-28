@@ -9,7 +9,7 @@ import {
     PieChart, Pie, Cell,
     BarChart, Bar,
 } from 'recharts'
-import { CalendarDays, TrendingUp, BarChart3, Calendar, Filter, Coins, Receipt, CreditCard } from 'lucide-react'
+import { CalendarDays, TrendingUp, BarChart3, Calendar, Filter, Coins, Receipt, CreditCard, XCircle } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
 
 type TimeRange = '7d' | '14d' | '30d' | '6m' | '12m' | 'year'
@@ -68,20 +68,54 @@ const DashboardPage: React.FC = () => {
     const kpis = useMemo(() => {
         const total = filteredBookings.length
         const revenue = filteredBookings.reduce((s, b) => s + (b.Summary || 0), 0)
-
-        // คำนวณรายได้เฉลี่ยต่อเดือนจากจำนวนเดือนที่มีข้อมูล
         const uniqueMonths = new Set(filteredBookings.map(b => b.Date ? b.Date.substring(0, 7) : "").filter(Boolean))
-        const monthsCount = uniqueMonths.size || 1 // ป้องกันหารด้วยศูนย์
+        const monthsCount = uniqueMonths.size || 1
         const avgMonthlyRevenue = revenue / monthsCount
-
-        // ภาษีที่หักรวม
         const tax = filteredBookings.reduce((s, b) => s + (b.Tax || 0), 0)
-
-        // รายได้เฉลี่ยต่องาน
         const avgRevenuePerBooking = total > 0 ? revenue / total : 0
+        const canceledCount = filteredBookings.filter(b => b.Status === 'Canceled').length
+        const cancellationRate = total > 0 ? (canceledCount / total) * 100 : 0
 
-        return { total, revenue, avgMonthlyRevenue, tax, avgRevenuePerBooking }
-    }, [filteredBookings])
+        // เปรียบเทียบ เดือนนี้ vs เดือนที่แล้ว (ไม่ขึ้นกับ date filter)
+        const now = new Date()
+        const thisMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+        const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        const prevMonthStr = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}`
+
+        const thisMonthBookings = bookings.filter(b => b.Date?.startsWith(thisMonthStr))
+        const prevMonthBookings = bookings.filter(b => b.Date?.startsWith(prevMonthStr))
+
+        const thisRevenue = thisMonthBookings.reduce((s, b) => s + (b.Summary || 0), 0)
+        const prevRevenue = prevMonthBookings.reduce((s, b) => s + (b.Summary || 0), 0)
+
+        const calcChange = (curr: number, prev: number) =>
+            prev === 0 ? (curr > 0 ? 100 : 0) : ((curr - prev) / prev) * 100
+
+        return {
+            total, revenue, avgMonthlyRevenue, tax, avgRevenuePerBooking, cancellationRate,
+            changes: {
+                total: calcChange(thisMonthBookings.length, prevMonthBookings.length),
+                revenue: calcChange(thisRevenue, prevRevenue),
+            }
+        }
+    }, [filteredBookings, bookings])
+
+    // ========== Upcoming Bookings (7 วันข้างหน้า) ==========
+    const upcomingBookings = useMemo(() => {
+        const now = new Date()
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+        const futureDate = new Date(now)
+        futureDate.setDate(futureDate.getDate() + 7)
+        const futureDateStr = `${futureDate.getFullYear()}-${String(futureDate.getMonth() + 1).padStart(2, '0')}-${String(futureDate.getDate()).padStart(2, '0')}`
+
+        return bookings
+            .filter(b => b.Date && b.Date >= todayStr && b.Date <= futureDateStr && b.Status !== 'Canceled')
+            .sort((a, b) => {
+                if (a.Date !== b.Date) return a.Date!.localeCompare(b.Date!)
+                return (a.StartTime || '').localeCompare(b.StartTime || '')
+            })
+    }, [bookings])
+
 
     // ========== Revenue Trend ==========
     const trendData = useMemo(() => {
@@ -93,23 +127,26 @@ const DashboardPage: React.FC = () => {
             const days = range === '7d' ? 7 : range === '14d' ? 14 : 30
             const cutoff = new Date(now)
             cutoff.setDate(cutoff.getDate() - days)
-            filtered = filtered.filter(b => b.Date && new Date(b.Date) >= cutoff)
+            // เปรียบเทียบเป็น string YYYY-MM-DD (local) แทน Date object (UTC)
+            const cutoffStr = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, '0')}-${String(cutoff.getDate()).padStart(2, '0')}`
+            filtered = filtered.filter(b => b.Date && b.Date >= cutoffStr)
             groupFn = (dateStr: string) => {
-                const d = new Date(dateStr)
+                const d = new Date(dateStr + 'T00:00:00')
                 return `${d.getDate()} ${THAI_MONTHS[d.getMonth()]}`
             }
         } else if (range === '6m' || range === '12m') {
             const months = range === '6m' ? 6 : 12
             const cutoff = new Date(now)
             cutoff.setMonth(cutoff.getMonth() - months)
-            filtered = filtered.filter(b => b.Date && new Date(b.Date) >= cutoff)
+            const cutoffStr = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, '0')}-${String(cutoff.getDate()).padStart(2, '0')}`
+            filtered = filtered.filter(b => b.Date && b.Date >= cutoffStr)
             groupFn = (dateStr: string) => {
-                const d = new Date(dateStr)
+                const d = new Date(dateStr + 'T00:00:00')
                 return `${THAI_MONTHS[d.getMonth()]} ${d.getFullYear() + 543 - 2500}`
             }
         } else {
             groupFn = (dateStr: string) => {
-                const d = new Date(dateStr)
+                const d = new Date(dateStr + 'T00:00:00')
                 return `${d.getFullYear()}`
             }
         }
@@ -139,14 +176,17 @@ const DashboardPage: React.FC = () => {
 
     const totalStatusCount = useMemo(() => statusData.reduce((s, d) => s + d.value, 0), [statusData])
 
-    // ========== Daily Bookings (7 days) ==========
     const dailyData = useMemo(() => {
         const now = new Date()
         const days: { label: string; count: number; sortKey: string }[] = []
         for (let i = 6; i >= 0; i--) {
             const d = new Date(now)
             d.setDate(d.getDate() - i)
-            const key = d.toISOString().split('T')[0]
+            // ใช้ local date (ไม่ใช่ UTC) เพื่อให้ตรงกับ Date ที่บันทึกในฐานข้อมูล
+            const y = d.getFullYear()
+            const m = String(d.getMonth() + 1).padStart(2, '0')
+            const day = String(d.getDate()).padStart(2, '0')
+            const key = `${y}-${m}-${day}`
             const label = `${d.getDate()} ${THAI_MONTHS[d.getMonth()]}`
             const count = filteredBookings.filter(b => b.Date === key).length
             days.push({ label, count, sortKey: key })
@@ -304,12 +344,74 @@ const DashboardPage: React.FC = () => {
                 </div>
 
                 {/* ===== KPI Cards ===== */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                    <KpiCard icon={<CalendarDays className="w-5 h-5" />} label="การจองทั้งหมด" value={kpis.total.toLocaleString()} color="blue" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <KpiCard icon={<CalendarDays className="w-5 h-5" />} label="การจองทั้งหมด" value={kpis.total.toLocaleString()} color="blue" change={kpis.changes.total} changeLabel="vs เดือนที่แล้ว" />
                     <KpiCard icon={<CreditCard className="w-5 h-5" />} label="เฉลี่ยต่องาน" value={`${kpis.avgRevenuePerBooking.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`} color="blue" />
                     <KpiCard icon={<Coins className="w-5 h-5" />} label="เฉลี่ยต่อเดือน" value={`${kpis.avgMonthlyRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`} color="amber" />
-                    <KpiCard icon={<TrendingUp className="w-5 h-5" />} label="รายได้รวม" value={`${kpis.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`} color="emerald" />
+                    <KpiCard icon={<TrendingUp className="w-5 h-5" />} label="รายได้รวม" value={`${kpis.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`} color="emerald" change={kpis.changes.revenue} changeLabel="vs เดือนที่แล้ว" />
                     <KpiCard icon={<Receipt className="w-5 h-5" />} label="ภาษีรวม" value={`${kpis.tax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`} color="amber" />
+                    <KpiCard icon={<XCircle className="w-5 h-5" />} label="อัตรายกเลิก" value={`${kpis.cancellationRate.toFixed(1)}%`} color={kpis.cancellationRate > 20 ? 'red' : kpis.cancellationRate > 10 ? 'amber' : 'emerald'} />
+                </div>
+
+                {/* ===== Upcoming Bookings Widget ===== */}
+                <div className="rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#111111] p-5 transition-colors">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-base font-semibold text-[#0d0d0d] dark:text-[#ececf1]">
+                            🗓️ การจองที่กำลังจะมาถึง (7 วัน)
+                        </h2>
+                        {upcomingBookings.length > 0 && (
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400">
+                                {upcomingBookings.length} รายการ
+                            </span>
+                        )}
+                    </div>
+                    {upcomingBookings.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                            <span className="text-3xl mb-2">📭</span>
+                            <p className="text-sm text-[#6e6e80] dark:text-[#8e8ea0]">ไม่มีการจองในช่วง 7 วันข้างหน้า</p>
+                        </div>
+                    ) : (
+                        <div className="divide-y divide-[#e5e5e5] dark:divide-[#2a2a2a]">
+                            {upcomingBookings.map((b) => {
+                                const d = new Date((b.Date || '') + 'T00:00:00')
+                                const now = new Date()
+                                const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+                                const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1)
+                                const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`
+                                const dateLabel = b.Date === todayStr ? 'วันนี้' : b.Date === tomorrowStr ? 'พรุ่งนี้' : `${d.getDate()} ${THAI_MONTHS[d.getMonth()]}`
+                                const isToday = b.Date === todayStr
+                                const statusColors: Record<string, string> = {
+                                    Booking: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400',
+                                    Inprogress: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400',
+                                    Completed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400',
+                                }
+                                return (
+                                    <div key={b.ID} className={`flex items-center gap-4 py-3 ${isToday ? 'bg-blue-50/50 dark:bg-blue-500/5 -mx-5 px-5' : ''}`}>
+                                        <div className={`shrink-0 text-center w-12 ${isToday ? 'text-blue-600 dark:text-blue-400' : 'text-[#6e6e80] dark:text-[#8e8ea0]'}`}>
+                                            <p className="text-[10px] font-semibold uppercase tracking-wide">{isToday ? '🔴 วันนี้' : dateLabel}</p>
+                                            <p className="text-sm font-bold mt-0.5">{b.StartTime?.slice(0, 5)}</p>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-semibold text-[#0d0d0d] dark:text-[#ececf1] truncate">
+                                                {b.CustomerMaster?.CustomerName || 'ไม่ระบุลูกค้า'}
+                                            </p>
+                                            <p className="text-xs text-[#6e6e80] dark:text-[#8e8ea0] truncate">
+                                                {b.JobTypeMaster?.TypeName || '-'} · {b.LocationMaster?.LocationName || '-'} · {b.StartTime?.slice(0, 5)}–{b.EndTime?.slice(0, 5)}
+                                            </p>
+                                        </div>
+                                        <div className="shrink-0 flex flex-col items-end gap-1">
+                                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusColors[b.Status || 'Booking']}`}>
+                                                {b.Status}
+                                            </span>
+                                            <span className="text-xs font-medium text-[#0d0d0d] dark:text-[#ececf1]">
+                                                {(b.Summary || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ฿
+                                            </span>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
                 </div>
 
                 {/* ===== Revenue Trend ===== */}
@@ -545,16 +647,33 @@ const colorMap: Record<string, string> = {
     red: 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20',
 }
 
-function KpiCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) {
+function KpiCard({
+    icon, label, value, color, change, changeLabel
+}: {
+    icon: React.ReactNode; label: string; value: string; color: string;
+    change?: number; changeLabel?: string
+}) {
+    const isPositive = (change ?? 0) >= 0
     return (
         <div className="rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#111111] p-4 sm:p-5 transition-colors">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center justify-between mb-3">
                 <div className={`p-2 rounded-lg border ${colorMap[color] || colorMap.blue}`}>
                     {icon}
                 </div>
+                {change !== undefined && (
+                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 ${isPositive
+                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400'
+                        : 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400'
+                        }`}>
+                        {isPositive ? '↑' : '↓'} {Math.abs(change).toFixed(0)}%
+                    </span>
+                )}
             </div>
             <p className="text-xs font-medium text-[#6e6e80] dark:text-[#8e8ea0] uppercase tracking-wider mb-1">{label}</p>
             <p className="text-xl sm:text-2xl font-bold text-[#0d0d0d] dark:text-[#ececf1] tracking-tight truncate min-w-0" title={value}>{value}</p>
+            {changeLabel && change !== undefined && (
+                <p className="text-[10px] text-[#6e6e80] dark:text-[#8e8ea0] mt-1">{changeLabel}</p>
+            )}
         </div>
     )
 }
