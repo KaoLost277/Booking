@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react'
 import { useForm, Controller, useFieldArray } from 'react-hook-form'
 import {
-    X, Calendar, Clock, MapPin, User, Briefcase, Activity, Plus, Trash2
+    X, Calendar, Clock, MapPin, User, Briefcase, Activity, Plus
 } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
