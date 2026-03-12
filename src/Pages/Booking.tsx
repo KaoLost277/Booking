@@ -136,25 +136,27 @@ function BookingLayout() {
 
         {/* Page Header — OpenAI style: clean, minimal */}
         <div className="border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
-          <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-              {/* Title */}
-              <div className="flex items-start gap-4">
-                <div className="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#f7f7f8] dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#2a2a2a] transition-colors">
-                  <CalendarDays className="h-6 w-6 text-[#0d0d0d] dark:text-[#ececf1]" />
-                </div>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-semibold text-[#0d0d0d] dark:text-[#ececf1] tracking-tight">
-                    จัดการข้อมูลการจอง
-                  </h1>
-                  <p className="mt-1 text-[#6e6e80] dark:text-[#8e8ea0] text-sm">
-                    จัดการรายการจองคิวทั้งหมด
-                  </p>
+          <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+            <div className="flex flex-col gap-4 sm:gap-5">
+              {/* Title Row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#f7f7f8] dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#2a2a2a] transition-colors">
+                    <CalendarDays className="h-6 w-6 text-[#0d0d0d] dark:text-[#ececf1]" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-[#0d0d0d] dark:text-[#ececf1] tracking-tight">
+                      จัดการข้อมูลการจอง
+                    </h1>
+                    <p className="mt-0.5 text-[#6e6e80] dark:text-[#8e8ea0] text-xs sm:text-sm">
+                      จัดการรายการจองคิวทั้งหมด
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div ref={heroButtonRef} className="flex flex-col sm:flex-row items-center gap-3">
+              {/* Actions Row — full width on mobile */}
+              <div ref={heroButtonRef} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                 {/* View Toggle */}
                 <div className="flex bg-[#f7f7f8] dark:bg-[#1a1a1a] p-1 rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a]">
                   <button
@@ -181,7 +183,7 @@ function BookingLayout() {
                   </button>
                 </div>
 
-                <CustomButton onClick={handleNewBooking}>
+                <CustomButton onClick={handleNewBooking} className="w-full sm:w-auto justify-center">
                   <Plus className="w-5 h-5" />
                   เพิ่มการจองใหม่
                 </CustomButton>
@@ -191,7 +193,7 @@ function BookingLayout() {
         </div>
 
         {/* Main Content */}
-        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <main className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-6 sm:py-8 lg:px-8">
           {/* Filter */}
           <div className="mb-6">
             <BookingFilter
