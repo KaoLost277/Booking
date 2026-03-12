@@ -12,6 +12,7 @@ interface CustomerModalProps {
     isOpen: boolean;
     onClose: () => void;
     editingCustomer?: CustomerMaster | null;
+    onSaved?: (newId: number) => void;
 }
 
 interface FormValues {
@@ -19,7 +20,7 @@ interface FormValues {
     facebookIink: string;
 }
 
-const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, editingCustomer }) => {
+const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, editingCustomer, onSaved }) => {
     const dispatch = useAppDispatch()
     const { customers } = useAppSelector((state) => state.masterData)
     const isEditMode = !!editingCustomer
@@ -78,7 +79,11 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, editingC
             if (isEditMode && editingCustomer) {
                 await dispatch(updateCustomer({ id: editingCustomer.ID, updates: customerData })).unwrap()
             } else {
-                await dispatch(addCustomer(customerData)).unwrap()
+                const newCustomer = await dispatch(addCustomer(customerData)).unwrap()
+                // เรียก callback เพื่อ auto-select ลูกค้าที่เพิ่งสร้าง
+                if (onSaved && newCustomer?.ID) {
+                    onSaved(newCustomer.ID)
+                }
             }
 
             await dispatch(fetchCustomers())

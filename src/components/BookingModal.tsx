@@ -440,6 +440,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
     // Quick Add Modal States
     const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false)
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
+    const [addingCustomerForIndex, setAddingCustomerForIndex] = useState<number>(0)
 
     const handleRowErrorChange = React.useCallback((index: number, errorState: { timeError: string, overlapError: string, checkingOverlap: boolean }) => {
         setRowErrors(prev => ({
@@ -557,6 +558,15 @@ const BookingModal: React.FC<BookingModalProps> = ({
     const jobOptions = (jobTypes || []).map((j) => ({ id: j.ID, label: j.TypeName }));
     const customerOptions = (customers || []).map((c) => ({ id: c.ID, label: c.CustomerName })).sort((a, b) => a.label.localeCompare(b.label, 'th'));
     const locationOptions = (locations || []).map((l) => ({ id: l.ID, label: l.LocationName })).sort((a, b) => a.label.localeCompare(b.label, 'th'));
+
+    // Callbacks สำหรับ auto-select หลังเพิ่ม master data ใหม่
+    const handleLocationSaved = React.useCallback((newId: number) => {
+        setValue('location', newId, { shouldValidate: true })
+    }, [setValue])
+
+    const handleCustomerSaved = React.useCallback((newId: number) => {
+        setValue(`items.${addingCustomerForIndex}.customer`, newId, { shouldValidate: true })
+    }, [setValue, addingCustomerForIndex])
 
     const onSubmit = async (data: FormValues) => {
         setSubmitting(true)
@@ -750,7 +760,10 @@ const BookingModal: React.FC<BookingModalProps> = ({
                                     customerOptions={customerOptions}
                                     statusOptions={statusOptions}
                                     onRowErrorChange={handleRowErrorChange}
-                                    onAddCustomer={() => setIsCustomerModalOpen(true)}
+                                    onAddCustomer={() => {
+                                        setAddingCustomerForIndex(index)
+                                        setIsCustomerModalOpen(true)
+                                    }}
                                 />
                             ))}
                         </div>
@@ -794,10 +807,12 @@ const BookingModal: React.FC<BookingModalProps> = ({
             <CustomerModal
                 isOpen={isCustomerModalOpen}
                 onClose={() => setIsCustomerModalOpen(false)}
+                onSaved={handleCustomerSaved}
             />
             <LocationModal
                 isOpen={isLocationModalOpen}
                 onClose={() => setIsLocationModalOpen(false)}
+                onSaved={handleLocationSaved}
             />
         </div>
     );

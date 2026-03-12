@@ -12,6 +12,7 @@ interface LocationModalProps {
     isOpen: boolean;
     onClose: () => void;
     editingLocation?: LocationMaster | null;
+    onSaved?: (newId: number) => void;
 }
 
 interface FormValues {
@@ -19,7 +20,7 @@ interface FormValues {
     locationlink: string;
 }
 
-const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose, editingLocation }) => {
+const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose, editingLocation, onSaved }) => {
     const dispatch = useAppDispatch()
     const { locations } = useAppSelector((state) => state.masterData)
     const isEditMode = !!editingLocation
@@ -78,7 +79,11 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose, editingL
             if (isEditMode && editingLocation) {
                 await dispatch(updateLocation({ id: editingLocation.ID, updates: locationData })).unwrap()
             } else {
-                await dispatch(addLocation(locationData)).unwrap()
+                const newLocation = await dispatch(addLocation(locationData)).unwrap()
+                // เรียก callback เพื่อ auto-select สถานที่ที่เพิ่งสร้าง
+                if (onSaved && newLocation?.ID) {
+                    onSaved(newLocation.ID)
+                }
             }
 
             await dispatch(fetchLocations())

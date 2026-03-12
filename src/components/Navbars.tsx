@@ -207,75 +207,83 @@ export default function Navbars({
 
               {/* Notification Dropdown */}
               {notifOpen && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-[#1a1a1a] rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] shadow-xl overflow-hidden z-50">
-                  {/* Header */}
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
-                    <div>
-                      <p className="text-sm font-semibold text-[#0d0d0d] dark:text-[#ececf1]">การแจ้งเตือน</p>
-                      {pendingCount > 0 && (
-                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
-                          มี {pendingCount} รายการรอยืนยัน
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => setNotifOpen(false)}
-                      className="p-1 rounded-lg text-[#6e6e80] hover:bg-[#f7f7f8] dark:hover:bg-[#2a2a2a] transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
+                <>
+                  {/* Backdrop for mobile — click to close */}
+                  <div
+                    className="fixed inset-0 z-40 sm:hidden"
+                    onClick={() => setNotifOpen(false)}
+                  />
 
-                  {/* Notification list */}
-                  <div className="max-h-80 overflow-y-auto divide-y divide-[#e5e5e5] dark:divide-[#2a2a2a]">
-                    {notifications.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-8 text-center">
-                        <Bell className="w-8 h-8 text-[#acacbe] dark:text-[#6e6e80] mb-2" />
-                        <p className="text-sm text-[#6e6e80] dark:text-[#8e8ea0]">ไม่มีการจองในช่วงนี้</p>
-                      </div>
-                    ) : notifications.map((b) => (
-                      <div
-                        key={b.ID}
-                        className="flex items-start gap-3 px-4 py-3 hover:bg-[#f7f7f8] dark:hover:bg-[#111111] transition-colors"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-[#0d0d0d] dark:text-[#ececf1] truncate">
-                            {b.CustomerMaster?.CustomerName || 'ไม่ระบุลูกค้า'}
+                  <div className="fixed left-2 right-2 top-14 z-50 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 bg-white dark:bg-[#1a1a1a] rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] shadow-xl overflow-hidden">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
+                      <div>
+                        <p className="text-sm font-semibold text-[#0d0d0d] dark:text-[#ececf1]">การแจ้งเตือน</p>
+                        {pendingCount > 0 && (
+                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+                            มี {pendingCount} รายการรอยืนยัน
                           </p>
-                          <p className="text-xs text-[#6e6e80] dark:text-[#8e8ea0] truncate mt-0.5">
-                            {b.JobTypeMaster?.TypeName || '-'} · {b.LocationMaster?.LocationName || '-'}
-                          </p>
-                          <div className="flex items-center gap-2 mt-1.5">
-                            <span className="flex items-center gap-1 text-[10px] text-[#6e6e80] dark:text-[#8e8ea0]">
-                              <Calendar className="w-3 h-3" />
-                              {formatNotifDate(b.Date || '')}
-                            </span>
-                            <span className="flex items-center gap-1 text-[10px] text-[#6e6e80] dark:text-[#8e8ea0]">
-                              <Clock className="w-3 h-3" />
-                              {b.StartTime?.slice(0, 5)} - {b.EndTime?.slice(0, 5)}
-                            </span>
-                          </div>
-                        </div>
-                        <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusStyle[b.Status || 'Booking']}`}>
-                          {b.Status}
-                        </span>
+                        )}
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Footer */}
-                  {notifications.length > 0 && (
-                    <div className="px-4 py-2.5 border-t border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f7f7f8] dark:bg-[#111111]">
-                      <NavLink
-                        to={PATH.BOOKING}
+                      <button
                         onClick={() => setNotifOpen(false)}
-                        className="block text-center text-xs font-medium text-[#6e6e80] dark:text-[#8e8ea0] hover:text-[#0d0d0d] dark:hover:text-[#ececf1] transition-colors"
+                        className="p-1.5 rounded-lg text-[#6e6e80] hover:bg-[#f7f7f8] dark:hover:bg-[#2a2a2a] transition-colors"
                       >
-                        ดูการจองทั้งหมด →
-                      </NavLink>
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
-                  )}
-                </div>
+
+                    {/* Notification list */}
+                    <div className="max-h-[60vh] sm:max-h-80 overflow-y-auto divide-y divide-[#e5e5e5] dark:divide-[#2a2a2a]">
+                      {notifications.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                          <Bell className="w-8 h-8 text-[#acacbe] dark:text-[#6e6e80] mb-2" />
+                          <p className="text-sm text-[#6e6e80] dark:text-[#8e8ea0]">ไม่มีการจองในช่วงนี้</p>
+                        </div>
+                      ) : notifications.map((b) => (
+                        <div
+                          key={b.ID}
+                          className="flex items-start gap-3 px-4 py-3 hover:bg-[#f7f7f8] dark:hover:bg-[#111111] transition-colors"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-[#0d0d0d] dark:text-[#ececf1] truncate">
+                              {b.CustomerMaster?.CustomerName || 'ไม่ระบุลูกค้า'}
+                            </p>
+                            <p className="text-xs text-[#6e6e80] dark:text-[#8e8ea0] truncate mt-0.5">
+                              {b.JobTypeMaster?.TypeName || '-'} · {b.LocationMaster?.LocationName || '-'}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <span className="flex items-center gap-1 text-[10px] text-[#6e6e80] dark:text-[#8e8ea0]">
+                                <Calendar className="w-3 h-3" />
+                                {formatNotifDate(b.Date || '')}
+                              </span>
+                              <span className="flex items-center gap-1 text-[10px] text-[#6e6e80] dark:text-[#8e8ea0]">
+                                <Clock className="w-3 h-3" />
+                                {b.StartTime?.slice(0, 5)} - {b.EndTime?.slice(0, 5)}
+                              </span>
+                            </div>
+                          </div>
+                          <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusStyle[b.Status || 'Booking']}`}>
+                            {b.Status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Footer */}
+                    {notifications.length > 0 && (
+                      <div className="px-4 py-2.5 border-t border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f7f7f8] dark:bg-[#111111]">
+                        <NavLink
+                          to={PATH.BOOKING}
+                          onClick={() => setNotifOpen(false)}
+                          className="block text-center text-xs font-medium text-[#6e6e80] dark:text-[#8e8ea0] hover:text-[#0d0d0d] dark:hover:text-[#ececf1] transition-colors"
+                        >
+                          ดูการจองทั้งหมด →
+                        </NavLink>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </div>
 

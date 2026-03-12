@@ -299,3 +299,71 @@ html {
   width: 100% !important;
   box-sizing: border-box;
 }
+
+/* ─── FullCalendar Mobile Responsive ──────────────────────────── */
+
+/* Force toolbar to wrap and stack on mobile */
+@media (max-width: 639px) {
+  .fc-theme-custom .fc-toolbar {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    padding: 0 !important;
+  }
+
+  /* Title takes full row */
+  .fc-theme-custom .fc-toolbar .fc-toolbar-chunk:first-child {
+    width: 100% !important;
+    text-align: center !important;
+    order: -1 !important;
+  }
+
+  /* Remaining toolbar chunks take full row and center */
+  .fc-theme-custom .fc-toolbar .fc-toolbar-chunk:last-child {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+  }
+
+  /* Shrink toolbar title on mobile */
+  .fc-theme-custom .fc-toolbar-title {
+    font-size: 1rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  /* Smaller buttons on mobile */
+  .fc-theme-custom .fc-button {
+    padding: 0.35rem 0.6rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Compact the button group */
+  .fc-theme-custom .fc-button-group {
+    padding: 2px !important;
+    gap: 1px !important;
+  }
+
+  .fc-theme-custom .fc-button-group>.fc-button {
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* Smaller event text */
+  .fc-theme-custom .fc-event-main {
+    font-size: 0.625rem !important;
+  }
+
+  /* Tighter time axis labels */
+  .fc-theme-custom .fc-timegrid-slot-label-cushion,
+  .fc-theme-custom .fc-timegrid-axis-cushion {
+    font-size: 0.65rem !important;
+  }
+
+  /* Compact day headers */
+  .fc-theme-custom .fc-col-header-cell-cushion {
+    font-size: 0.625rem !important;
+    padding: 4px 2px !important;
+    letter-spacing: 0.02em !important;
+  }
+}

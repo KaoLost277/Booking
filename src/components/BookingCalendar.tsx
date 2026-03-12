@@ -111,16 +111,16 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ onEdit, onSelect, fil
     }
 
     return (
-        <div className="w-full bg-[#fafafa] dark:bg-[#111111] border border-[#e5e5e5] dark:border-[#2a2a2a] rounded-xl overflow-hidden shadow-sm p-4">
+        <div className="w-full bg-[#fafafa] dark:bg-[#111111] border border-[#e5e5e5] dark:border-[#2a2a2a] rounded-xl overflow-hidden shadow-sm p-2 sm:p-4">
             {/* Calendar Wrapper with scoped CSS overrides for themes */}
-            <div className="fc-theme-custom h-[700px]">
+            <div className="fc-theme-custom fc-mobile-friendly h-[500px] sm:h-[600px] lg:h-[700px]">
                 <FullCalendar
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                     initialView="timeGridWeek"
                     headerToolbar={{
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                        start: 'title',
+                        center: '',
+                        end: 'prev,next today dayGridMonth,timeGridWeek,timeGridDay'
                     }}
                     slotMinTime="06:00:00"
                     slotMaxTime="24:00:00"
